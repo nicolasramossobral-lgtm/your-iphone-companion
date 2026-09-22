@@ -34,6 +34,23 @@ function Login() {
     }
   }
 
+  async function handleSignup(event: FormEvent<HTMLFormElement>) {
+    event.preventDefault();
+    setError(null);
+    setStatus(null);
+    setLoading(true);
+    try {
+      await signUp(email.trim(), password, fullName);
+      setPassword("");
+      setStatus("Cadastro enviado. Aguarde a aprovação do administrador para acessar o sistema.");
+      setMode("login");
+    } catch (err) {
+      setError(err instanceof Error ? err.message : "Não foi possível enviar o cadastro.");
+    } finally {
+      setLoading(false);
+    }
+  }
+
   async function handleForgotPassword() {
     const normalizedEmail = email.trim();
     if (!normalizedEmail) {
