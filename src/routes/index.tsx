@@ -2,7 +2,7 @@ import { createFileRoute } from "@tanstack/react-router";
 import { ArrowRight, Eye, EyeOff, LockKeyhole, Mail, Smartphone, UserPlus } from "lucide-react";
 import { FormEvent, useState } from "react";
 import { dataApi } from "../lib/supabase-data";
-import { bootstrapFirstAdmin, resetPassword, signIn } from "../lib/supabase-auth";
+import { bootstrapFirstAdmin, resetPassword, signIn, signUp } from "../lib/supabase-auth";
 
 export const Route = createFileRoute("/")({
   component: Login,
