@@ -1,0 +1,55 @@
+import { getStoredSession } from "./supabase-auth";
+
+const SUPABASE_URL = import.meta.env.VITE_SUPABASE_URL as string | undefined;
+const SUPABASE_ANON_KEY = import.meta.env.VITE_SUPABASE_ANON_KEY as string | undefined;
+
+function config() {
+  if (!SUPABASE_URL || !SUPABASE_ANON_KEY) throw new Error("Supabase não está configurado.");
+  const session = getStoredSession();
+  if (!session) throw new Error("Sessão expirada. Faça login novamente.");
+  return { session, base: SUPABASE_URL, key: SUPABASE_ANON_KEY };
+}
+
+async function request<T>(table: string, options: RequestInit = {}, query = ""): Promise<T> {
+  const { session, base, key } = config();
+  const response = await fetch(`${base}/rest/v1/${table}${query}`, {
+    ...options,
+    headers: {
+      apikey: key,
+      Authorization: `Bearer ${session.access_token}`,
+      "Content-Type": "application/json",
+      ...(options.headers ?? {}),
+    },
+  });
+  if (!response.ok) {
+    const body = await response.text();
+    throw new Error(body || `Erro ao acessar ${table}.`);
+  }
+  const text = await response.text();
+  return (text ? JSON.parse(text) : null) as T;
+}
+
+export type Product = { id: string; model: string; brand: string; active: boolean };
+export type Variant = { id: string; product_id: string; storage_gb: number; color: string; condition: string; sku: string | null };
+export type Supplier = { id: string; name: string; legal_name: string | null; notes: string | null; active: boolean };
+export type Offer = { id: string; supplier_id: string; product_variant_id: string; price: number; stock_quantity: number | null; observed_at: string; active: boolean };
+
+export const dataApi = {
+  products: () => request<Product[]>("products", {}, "?select=*&order=model"),
+  variants: () => request<Variant[]>("product_variants", {}, "?select=*&order=storage_gb"),
+  suppliers: () => request<Supplier[]>("suppliers", {}, "?select=*&order=name"),
+  offers: () => request<Offer[]>("supplier_prices", {}, "?select=*&order=price"),
+  role: async () => {
+    const session = getStoredSession();
+    if (!session) return null;
+    const rows = await request<Array<{ role: "admin" | "vendor" }>>("user_roles", {}, `?select=role&user_id=eq.${session.user.id}&limit=1`);
+    return rows[0]?.role ?? null;
+  },
+  addProduct: (model: string) => request<Product[]>("products", { method: "POST", headers: { Prefer: "return=representation" }, body: JSON.stringify({ model, brand: "Apple", active: true }) }),
+  addVariant: (data: Omit<Variant, "id">) => request<Variant[]>("product_variants", { method: "POST", headers: { Prefer: "return=representation" }, body: JSON.stringify(data) }),
+  addSupplier: (name: string, legal_name: string) => request<Supplier[]>("suppliers", { method: "POST", headers: { Prefer: "return=representation" }, body: JSON.stringify({ name, legal_name, active: true }) }),
+  addOffer: (data: Omit<Offer, "id" | "observed_at" | "active">) => request<Offer[]>("supplier_prices", { method: "POST", headers: { Prefer: "return=representation" }, body: JSON.stringify({ ...data, active: true }) }),
+  updateProduct: (id: string, data: Partial<Product>) => request<null>("products", { method: "PATCH", body: JSON.stringify(data) }, `?id=eq.${id}`),
+  updateSupplier: (id: string, data: Partial<Supplier>) => request<null>("suppliers", { method: "PATCH", body: JSON.stringify(data) }, `?id=eq.${id}`),
+  updateOffer: (id: string, data: Partial<Offer>) => request<null>("supplier_prices", { method: "PATCH", body: JSON.stringify(data) }, `?id=eq.${id}`),
+};
