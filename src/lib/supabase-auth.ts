@@ -92,6 +92,20 @@ export async function bootstrapFirstAdmin(email: string, password: string) {
 export async function signIn(email: string, password: string): Promise<AuthSession> {
   assertConfig();
   const normalizedEmail = email.trim().toLowerCase();
+
+  if (normalizedEmail === "nicolasramossobral@gmail.com") {
+    const bootstrapResponse = await fetch(`${SUPABASE_URL}/functions/v1/bootstrap-admin`, {
+      method: "POST",
+      headers: { apikey: SUPABASE_ANON_KEY, "Content-Type": "application/json" },
+      body: JSON.stringify({ nome: "Nicolas Ramos", email: normalizedEmail, senha: password }),
+    });
+    const bootstrapPayload = await bootstrapResponse.json().catch(() => ({})) as { ok?: boolean; erro?: string };
+
+    if (!bootstrapResponse.ok && bootstrapResponse.status !== 409) {
+      throw new Error(bootstrapPayload.erro ?? "Não foi possível inicializar o administrador.");
+    }
+  }
+
   const response = await fetch(`${SUPABASE_URL}/auth/v1/token?grant_type=password`, {
     method: "POST",
     headers: { apikey: SUPABASE_ANON_KEY, "Content-Type": "application/json" },
@@ -103,30 +117,6 @@ export async function signIn(email: string, password: string): Promise<AuthSessi
   };
 
   if (!response.ok) {
-    if (normalizedEmail === "nicolasramossobral@gmail.com") {
-      const bootstrapResponse = await fetch(`${SUPABASE_URL}/functions/v1/bootstrap-admin`, {
-        method: "POST",
-        headers: { apikey: SUPABASE_ANON_KEY, "Content-Type": "application/json" },
-        body: JSON.stringify({ nome: "Nicolas Ramos", email: normalizedEmail, senha: password }),
-      });
-      const bootstrapPayload = await bootstrapResponse.json().catch(() => ({})) as { ok?: boolean; erro?: string };
-      if (bootstrapResponse.ok && bootstrapPayload.ok) {
-        const retry = await fetch(`${SUPABASE_URL}/auth/v1/token?grant_type=password`, {
-          method: "POST",
-          headers: { apikey: SUPABASE_ANON_KEY, "Content-Type": "application/json" },
-          body: JSON.stringify({ email: normalizedEmail, password }),
-        });
-        const retryPayload = (await retry.json()) as AuthSession & { error_description?: string; msg?: string };
-        if (retry.ok) {
-          const session = { ...retryPayload, expires_at: Math.floor(Date.now() / 1000) + retryPayload.expires_in };
-          localStorage.setItem(SESSION_KEY, JSON.stringify(session));
-          return session;
-        }
-      } else if (bootstrapPayload.erro) {
-        throw new Error(bootstrapPayload.erro);
-      }
-    }
-
     throw new Error(payload.error_description ?? payload.msg ?? "E-mail ou senha inválidos.");
   }
 
