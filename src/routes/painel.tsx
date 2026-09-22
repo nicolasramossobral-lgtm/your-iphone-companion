@@ -1,5 +1,5 @@
 import { createFileRoute } from "@tanstack/react-router";
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useState, type ReactNode } from "react";
 import { BarChart3, Boxes, LogOut, Package, Plus, RefreshCw, Search, Store, Users, X } from "lucide-react";
 import { getStoredSession, signOut } from "../lib/supabase-auth";
 import { dataApi, type Offer, type Product, type Supplier, type Variant } from "../lib/supabase-data";
@@ -113,7 +113,7 @@ function Dashboard() {
 
 function Empty({text}:{text:string}) { return <div className="p-10 text-center text-sm text-slate-500">{text}</div>; }
 
-function Modal({title,children,onClose}:{title:string;children:React.ReactNode;onClose:()=>void}) {
+function Modal({title,children,onClose}:{title:string;children:ReactNode;onClose:()=>void}) {
   return <div className="fixed inset-0 z-50 flex items-center justify-center bg-slate-950/40 p-4"><div className="w-full max-w-lg rounded-2xl bg-white p-6 shadow-xl"><div className="flex items-center justify-between"><h2 className="text-lg font-semibold">{title}</h2><button onClick={onClose}><X className="h-5 w-5"/></button></div>{children}</div></div>;
 }
 
