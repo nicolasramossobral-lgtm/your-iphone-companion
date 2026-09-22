@@ -11,6 +11,7 @@
 import { Route as rootRouteImport } from './routes/__root'
 import { Route as IndexRouteImport } from './routes/index'
 import { Route as CadastroRouteImport } from './routes/cadastro'
+import { Route as UsuariosRouteImport } from './routes/usuarios'
 import { Route as PainelRouteImport } from './routes/painel'
 
 const IndexRoute = IndexRouteImport.update({
@@ -25,6 +26,12 @@ const CadastroRoute = CadastroRouteImport.update({
   getParentRoute: () => rootRouteImport,
 } as any)
 
+const UsuariosRoute = UsuariosRouteImport.update({
+  id: '/usuarios',
+  path: '/usuarios',
+  getParentRoute: () => rootRouteImport,
+} as any)
+
 const PainelRoute = PainelRouteImport.update({
   id: '/painel',
   path: '/painel',
@@ -34,6 +41,7 @@ const PainelRoute = PainelRouteImport.update({
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
   '/cadastro': typeof CadastroRoute
+  '/usuarios': typeof UsuariosRoute
   '/painel': typeof PainelRoute
 }
 export interface FileRoutesByTo {
@@ -49,15 +57,16 @@ export interface FileRoutesById {
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
-  fullPaths: '/' | '/cadastro' | '/painel'
+  fullPaths: '/' | '/cadastro' | '/usuarios' | '/painel'
   fileRoutesByTo: FileRoutesByTo
-  to: '/' | '/cadastro' | '/painel'
-  id: '__root__' | '/' | '/cadastro' | '/painel'
+  to: '/' | '/cadastro' | '/usuarios' | '/painel'
+  id: '__root__' | '/' | '/cadastro' | '/usuarios' | '/painel'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
   CadastroRoute: typeof CadastroRoute
+  UsuariosRoute: typeof UsuariosRoute
   PainelRoute: typeof PainelRoute
 }
 
@@ -77,6 +86,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof CadastroRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/usuarios': {
+      id: '/usuarios'
+      path: '/usuarios'
+      fullPath: '/usuarios'
+      preLoaderRoute: typeof UsuariosRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/painel': {
       id: '/painel'
       path: '/painel'
@@ -90,6 +106,7 @@ declare module '@tanstack/react-router' {
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
   CadastroRoute: CadastroRoute,
+  UsuariosRoute: UsuariosRoute,
   PainelRoute: PainelRoute,
 }
 export const routeTree = rootRouteImport
