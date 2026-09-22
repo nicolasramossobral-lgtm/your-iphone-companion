@@ -1,5 +1,5 @@
 import { createFileRoute } from "@tanstack/react-router";
-import { Eye, EyeOff, LockKeyhole, Mail } from "lucide-react";
+import { ArrowRight, Eye, EyeOff, LockKeyhole, Mail, Smartphone } from "lucide-react";
 import { FormEvent, useState } from "react";
 import { resetPassword, signIn } from "../lib/supabase-auth";
 
@@ -51,124 +51,181 @@ function Login() {
   }
 
   return (
-    <main className="min-h-screen bg-slate-950 text-white">
-      <div className="mx-auto grid min-h-screen max-w-7xl lg:grid-cols-2">
-        <section className="hidden flex-col justify-between p-10 lg:flex xl:p-16">
-          <div>
-            <div className="flex items-center gap-3">
-              <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-white text-sm font-black text-slate-950">
-                YI
-              </div>
-              <span className="text-lg font-semibold tracking-tight">Your iPhone Companion</span>
+    <main className="relative min-h-screen overflow-hidden bg-[#05091f] text-white">
+      <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(circle_at_15%_20%,rgba(124,58,237,0.28),transparent_30%),radial-gradient(circle_at_78%_72%,rgba(37,99,235,0.2),transparent_34%),linear-gradient(135deg,#07113b_0%,#05091f_48%,#0a0630_100%)]" />
+      <div className="pointer-events-none absolute -left-32 -top-40 h-[520px] w-[760px] rotate-[-25deg] bg-gradient-to-br from-violet-700/50 via-blue-700/10 to-transparent blur-2xl" />
+      <div className="pointer-events-none absolute -bottom-64 left-[45%] h-[520px] w-[700px] rotate-[-30deg] bg-gradient-to-br from-violet-700/30 to-transparent blur-3xl" />
+
+      <div className="relative mx-auto flex min-h-screen max-w-[1600px] flex-col px-5 py-6 sm:px-8 lg:px-12 xl:px-16">
+        <header className="flex items-center justify-between">
+          <div className="flex items-center gap-4">
+            <div className="relative flex h-12 w-12 items-center justify-center overflow-hidden rounded-2xl border border-violet-400/50 bg-gradient-to-br from-violet-600/70 via-blue-600/50 to-cyan-400/40 shadow-[0_0_30px_rgba(99,102,241,0.45)]">
+              <Smartphone className="h-7 w-7 text-white" strokeWidth={1.8} />
+            </div>
+            <div className="leading-tight">
+              <div className="text-lg font-bold tracking-tight">Your iPhone</div>
+              <div className="text-lg font-bold tracking-tight text-violet-400">Companion</div>
             </div>
           </div>
-          <div className="max-w-lg pb-8">
-            <p className="mb-4 text-sm font-medium uppercase tracking-[0.2em] text-slate-400">
-              Gestão inteligente
-            </p>
-            <h1 className="text-4xl font-semibold leading-tight xl:text-5xl">
-              Controle seus produtos, fornecedores e preços em um só lugar.
-            </h1>
-            <p className="mt-6 text-base leading-7 text-slate-400">
-              Acesse seu painel para acompanhar ofertas, estoque e informações do seu catálogo.
-            </p>
-          </div>
-          <p className="text-sm text-slate-500">© {new Date().getFullYear()} Your iPhone Companion</p>
-        </section>
+          <nav className="hidden items-center gap-7 text-sm text-blue-200/80 md:flex">
+            <span>Tecnologia</span>
+            <span className="text-white/60">•</span>
+            <span>Negócios</span>
+            <span className="text-white/60">•</span>
+            <span>Resultados</span>
+          </nav>
+        </header>
 
-        <section className="flex min-h-screen items-center justify-center bg-white px-5 py-10 text-slate-950 sm:px-8">
-          <div className="w-full max-w-md">
-            <div className="mb-10 lg:hidden">
-              <div className="flex items-center gap-3">
-                <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-slate-950 text-sm font-black text-white">
-                  YI
-                </div>
-                <span className="text-lg font-semibold tracking-tight">Your iPhone Companion</span>
-              </div>
-            </div>
-
-            <div className="mb-8">
-              <h2 className="text-3xl font-semibold tracking-tight">Bem-vindo de volta</h2>
-              <p className="mt-2 text-sm leading-6 text-slate-500">
-                Entre com suas credenciais para acessar o sistema.
+        <div className="grid flex-1 items-center gap-10 py-10 lg:grid-cols-[1.05fr_0.95fr] lg:gap-14 xl:gap-20">
+          <section className="relative hidden min-h-[650px] lg:flex lg:flex-col lg:justify-center">
+            <div className="max-w-xl">
+              <p className="mb-4 text-xl font-semibold text-transparent bg-gradient-to-r from-indigo-300 via-blue-400 to-violet-400 bg-clip-text">
+                Bem-vindo ao
+              </p>
+              <h1 className="text-5xl font-bold leading-[0.98] tracking-tight xl:text-6xl">
+                Your iPhone
+                <span className="block bg-gradient-to-r from-violet-500 via-blue-500 to-cyan-400 bg-clip-text text-transparent">
+                  Companion
+                </span>
+              </h1>
+              <p className="mt-7 max-w-md text-lg leading-8 text-blue-100/75">
+                Compare preços, encontre os melhores fornecedores e maximize seus lucros com a iPhone Companion.
               </p>
             </div>
 
-            <form className="space-y-5" onSubmit={handleSubmit}>
-              <label className="block">
-                <span className="mb-2 block text-sm font-medium text-slate-700">E-mail</span>
-                <div className="relative">
-                  <Mail className="pointer-events-none absolute left-3.5 top-1/2 h-4 w-4 -translate-y-1/2 text-slate-400" />
-                  <input
-                    type="email"
-                    name="email"
-                    autoComplete="email"
-                    placeholder="seu@email.com"
-                    required
-                    value={email}
-                    onChange={(event) => setEmail(event.target.value)}
-                    className="h-12 w-full rounded-xl border border-slate-200 bg-white pl-10 pr-4 text-sm outline-none transition placeholder:text-slate-400 focus:border-slate-950 focus:ring-2 focus:ring-slate-950/10"
-                  />
+            <div className="relative mt-8 h-[380px] w-full max-w-2xl">
+              <div className="absolute left-[28%] top-[16%] h-48 w-48 rounded-full bg-fuchsia-600/35 blur-3xl" />
+              <div className="absolute left-[38%] top-[10%] h-64 w-64 rounded-full bg-blue-600/25 blur-3xl" />
+              <div className="absolute left-[25%] top-[38%] h-24 w-[430px] rotate-[-12deg] rounded-[50%] border-2 border-fuchsia-500/80 shadow-[0_0_35px_rgba(168,85,247,0.8),0_0_70px_rgba(37,99,235,0.5)]" />
+
+              <div className="absolute left-[40%] top-[3%] h-[310px] w-[155px] rotate-[8deg] rounded-[34px] border-[3px] border-violet-300/80 bg-gradient-to-br from-slate-800 via-indigo-950 to-blue-900 p-2 shadow-[0_20px_60px_rgba(59,130,246,0.45)]">
+                <div className="relative h-full overflow-hidden rounded-[27px] bg-[radial-gradient(circle_at_65%_25%,#7c3aed,transparent_35%),linear-gradient(145deg,#070b28,#071c58_55%,#0ea5e9)]">
+                  <div className="absolute left-1/2 top-2 h-5 w-16 -translate-x-1/2 rounded-full bg-black/90" />
+                  <div className="absolute -right-1 top-24 h-12 w-1 rounded-full bg-blue-300/60" />
+                  <div className="absolute inset-x-4 bottom-5 h-32 rounded-full bg-gradient-to-tr from-fuchsia-500/80 via-violet-500/40 to-cyan-300/70 blur-xl" />
                 </div>
-              </label>
-
-              <label className="block">
-                <span className="mb-2 block text-sm font-medium text-slate-700">Senha</span>
-                <div className="relative">
-                  <LockKeyhole className="pointer-events-none absolute left-3.5 top-1/2 h-4 w-4 -translate-y-1/2 text-slate-400" />
-                  <input
-                    type={showPassword ? "text" : "password"}
-                    name="password"
-                    autoComplete="current-password"
-                    placeholder="Digite sua senha"
-                    required
-                    value={password}
-                    onChange={(event) => setPassword(event.target.value)}
-                    className="h-12 w-full rounded-xl border border-slate-200 bg-white pl-10 pr-12 text-sm outline-none transition placeholder:text-slate-400 focus:border-slate-950 focus:ring-2 focus:ring-slate-950/10"
-                  />
-                  <button
-                    type="button"
-                    aria-label={showPassword ? "Ocultar senha" : "Mostrar senha"}
-                    onClick={() => setShowPassword((value) => !value)}
-                    className="absolute right-3 top-1/2 -translate-y-1/2 rounded-md p-1.5 text-slate-400 transition hover:bg-slate-100 hover:text-slate-700"
-                  >
-                    {showPassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
-                  </button>
-                </div>
-              </label>
-
-              {error && <p role="alert" className="rounded-xl bg-red-50 px-4 py-3 text-sm text-red-700">{error}</p>}
-              {status && <p role="status" className="rounded-xl bg-emerald-50 px-4 py-3 text-sm text-emerald-700">{status}</p>}
-
-              <div className="flex items-center justify-between gap-4 text-sm">
-                <label className="flex cursor-pointer items-center gap-2 text-slate-600">
-                  <input
-                    type="checkbox"
-                    checked={remember}
-                    onChange={(event) => setRemember(event.target.checked)}
-                    className="h-4 w-4 rounded border-slate-300"
-                  />
-                  Lembrar de mim
-                </label>
-                <button type="button" onClick={handleForgotPassword} disabled={loading} className="font-medium text-slate-900 hover:underline disabled:opacity-50">
-                  Esqueci minha senha
-                </button>
               </div>
 
-              <button
-                type="submit"
-                disabled={loading}
-                className="h-12 w-full rounded-xl bg-slate-950 px-4 text-sm font-semibold text-white shadow-sm transition hover:bg-slate-800 focus:outline-none focus:ring-2 focus:ring-slate-950 focus:ring-offset-2"
-              >
-                Entrar
-              </button>
-            </form>
+              <div className="absolute left-[26%] top-[10%] h-[315px] w-[158px] rotate-[-13deg] rounded-[34px] border-[3px] border-violet-200/70 bg-gradient-to-br from-purple-700 via-indigo-950 to-blue-900 p-2 shadow-[0_20px_60px_rgba(124,58,237,0.55)]">
+                <div className="relative h-full overflow-hidden rounded-[27px] bg-gradient-to-br from-indigo-900 via-violet-700 to-blue-950">
+                  <div className="absolute inset-5 rounded-[25px] bg-[radial-gradient(circle_at_30%_25%,#c084fc,transparent_25%),radial-gradient(circle_at_70%_75%,#22d3ee,transparent_32%),linear-gradient(145deg,#10002d,#172554)]" />
+                  <div className="absolute -right-1 top-20 h-16 w-1 rounded-full bg-violet-200/70" />
+                  <div className="absolute -left-1 top-24 h-12 w-1 rounded-full bg-violet-200/50" />
+                </div>
+                <div className="absolute -left-5 top-9 flex h-20 w-20 items-center justify-center rounded-3xl border-2 border-slate-300/60 bg-slate-900/90 shadow-xl">
+                  <div className="grid grid-cols-2 gap-2">
+                    <span className="h-5 w-5 rounded-full bg-slate-950 ring-2 ring-slate-400/50" />
+                    <span className="h-5 w-5 rounded-full bg-slate-950 ring-2 ring-slate-400/50" />
+                    <span className="h-5 w-5 rounded-full bg-slate-950 ring-2 ring-slate-400/50" />
+                    <span className="h-5 w-5 rounded-full bg-slate-950 ring-2 ring-slate-400/50" />
+                  </div>
+                </div>
+              </div>
 
-            <p className="mt-8 text-center text-xs leading-5 text-slate-400">
-              O acesso é controlado pelo administrador do sistema.
-            </p>
-          </div>
-        </section>
+              <div className="absolute bottom-0 left-[20%] h-12 w-[430px] rounded-full bg-blue-500/20 blur-2xl" />
+            </div>
+          </section>
+
+          <section className="flex w-full justify-center lg:justify-end">
+            <div className="w-full max-w-xl rounded-[28px] border border-violet-500/80 bg-slate-950/55 p-6 shadow-[0_0_55px_rgba(99,102,241,0.22)] backdrop-blur-xl sm:p-8 md:p-10">
+              <div className="mx-auto max-w-md">
+                <div className="mb-8 text-center">
+                  <div className="mx-auto mb-5 flex h-16 w-16 items-center justify-center rounded-2xl border border-violet-400/60 bg-gradient-to-br from-violet-600/70 via-blue-600/50 to-cyan-400/30 shadow-[0_0_35px_rgba(99,102,241,0.4)]">
+                    <Smartphone className="h-8 w-8 text-white" strokeWidth={1.7} />
+                  </div>
+                  <h2 className="text-3xl font-bold tracking-tight sm:text-4xl">Bem-vindo de volta</h2>
+                  <p className="mt-2 text-sm leading-6 text-blue-100/70">
+                    Entre com suas credenciais para acessar o sistema.
+                  </p>
+                </div>
+
+                <form className="space-y-5" onSubmit={handleSubmit}>
+                  <label className="block">
+                    <span className="mb-2 block text-sm font-medium text-blue-100">E-mail</span>
+                    <div className="relative">
+                      <Mail className="pointer-events-none absolute left-4 top-1/2 h-5 w-5 -translate-y-1/2 text-blue-300" />
+                      <input
+                        type="email"
+                        name="email"
+                        autoComplete="email"
+                        placeholder="seu@email.com"
+                        required
+                        value={email}
+                        onChange={(event) => setEmail(event.target.value)}
+                        className="h-16 w-full rounded-2xl border border-indigo-500/45 bg-indigo-950/45 pl-12 pr-4 text-sm text-white outline-none transition placeholder:text-blue-200/55 focus:border-cyan-400 focus:ring-2 focus:ring-cyan-400/15"
+                      />
+                    </div>
+                  </label>
+
+                  <label className="block">
+                    <span className="mb-2 block text-sm font-medium text-blue-100">Senha</span>
+                    <div className="relative">
+                      <LockKeyhole className="pointer-events-none absolute left-4 top-1/2 h-5 w-5 -translate-y-1/2 text-blue-300" />
+                      <input
+                        type={showPassword ? "text" : "password"}
+                        name="password"
+                        autoComplete="current-password"
+                        placeholder="Digite sua senha"
+                        required
+                        value={password}
+                        onChange={(event) => setPassword(event.target.value)}
+                        className="h-16 w-full rounded-2xl border border-indigo-500/45 bg-indigo-950/45 pl-12 pr-12 text-sm text-white outline-none transition placeholder:text-blue-200/55 focus:border-cyan-400 focus:ring-2 focus:ring-cyan-400/15"
+                      />
+                      <button
+                        type="button"
+                        aria-label={showPassword ? "Ocultar senha" : "Mostrar senha"}
+                        onClick={() => setShowPassword((value) => !value)}
+                        className="absolute right-3 top-1/2 -translate-y-1/2 rounded-lg p-2 text-blue-300 transition hover:bg-white/10 hover:text-white"
+                      >
+                        {showPassword ? <EyeOff className="h-5 w-5" /> : <Eye className="h-5 w-5" />}
+                      </button>
+                    </div>
+                  </label>
+
+                  {error && <p role="alert" className="rounded-2xl border border-red-500/60 bg-red-950/40 px-4 py-3 text-sm text-red-300">{error}</p>}
+                  {status && <p role="status" className="rounded-2xl border border-emerald-500/50 bg-emerald-950/35 px-4 py-3 text-sm text-emerald-300">{status}</p>}
+
+                  <div className="flex items-center justify-between gap-4 text-sm">
+                    <label className="flex cursor-pointer items-center gap-2 text-blue-100/80">
+                      <input
+                        type="checkbox"
+                        checked={remember}
+                        onChange={(event) => setRemember(event.target.checked)}
+                        className="h-5 w-5 rounded border-violet-400/70 bg-indigo-950/60 accent-violet-500"
+                      />
+                      Lembrar de mim
+                    </label>
+                    <button
+                      type="button"
+                      onClick={handleForgotPassword}
+                      disabled={loading}
+                      className="font-medium text-violet-300 transition hover:text-cyan-300 hover:underline disabled:opacity-50"
+                    >
+                      Esqueci minha senha
+                    </button>
+                  </div>
+
+                  <button
+                    type="submit"
+                    disabled={loading}
+                    className="group flex h-16 w-full items-center justify-center gap-3 rounded-2xl bg-gradient-to-r from-violet-600 via-indigo-600 to-cyan-500 px-4 text-base font-semibold text-white shadow-[0_10px_35px_rgba(79,70,229,0.35)] transition hover:brightness-110 focus:outline-none focus:ring-2 focus:ring-cyan-400 focus:ring-offset-2 focus:ring-offset-[#080b25] disabled:cursor-not-allowed disabled:opacity-60"
+                  >
+                    Entrar
+                    <ArrowRight className="h-5 w-5 transition-transform group-hover:translate-x-1" />
+                  </button>
+                </form>
+
+                <p className="mt-8 border-t border-indigo-500/25 pt-6 text-center text-xs leading-5 text-blue-100/65">
+                  O acesso é controlado pelo administrador do sistema.
+                </p>
+              </div>
+            </div>
+          </section>
+        </div>
+
+        <footer className="hidden pb-2 text-sm text-blue-200/70 lg:block">
+          © {new Date().getFullYear()} Your iPhone Companion
+        </footer>
       </div>
     </main>
   );
