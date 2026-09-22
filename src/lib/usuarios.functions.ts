@@ -128,12 +128,20 @@ export const criarUsuario = createServerFn({ method: "POST" })
       email: data.email,
       ativo: true,
     });
-    if (erroPerfil) return { ok: false, erro: "Usuário criado, mas o perfil falhou." };
+    if (erroPerfil) {
+      // Sem perfil a conta ficaria inutilizável: desfaz a criação.
+      await supabaseAdmin.auth.admin.deleteUser(novoId);
+      return { ok: false, erro: "Não foi possível criar o usuário. Tente novamente." };
+    }
 
     const { error: erroPapel } = await supabaseAdmin
       .from("user_roles")
       .upsert({ user_id: novoId, role: data.papel }, { onConflict: "user_id,role" });
-    if (erroPapel) return { ok: false, erro: "Usuário criado, mas o papel falhou." };
+    if (erroPapel) {
+      await supabaseAdmin.from("profiles").delete().eq("id", novoId);
+      await supabaseAdmin.auth.admin.deleteUser(novoId);
+      return { ok: false, erro: "Não foi possível definir o papel. Tente novamente." };
+    }
 
     return { ok: true };
   });
