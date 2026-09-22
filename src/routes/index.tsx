@@ -243,6 +243,7 @@ function Login() {
                 <p className="mt-8 border-t border-indigo-500/25 pt-6 text-center text-xs leading-5 text-blue-100/65">
                   O acesso é controlado pelo administrador do sistema.
                 </p>
+                <a href="/cadastro" className="mt-4 block text-center text-sm font-medium text-violet-300 hover:text-cyan-300 hover:underline">Solicitar acesso</a>
               </div>
             </div>
           </section>
