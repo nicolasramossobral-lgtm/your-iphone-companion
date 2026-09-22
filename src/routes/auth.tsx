@@ -1,6 +1,6 @@
 import { createFileRoute, useNavigate } from "@tanstack/react-router";
 import { useEffect, useState } from "react";
-import { Loader2, Lock } from "lucide-react";
+import { Loader2, Lock, ShieldCheck, Sparkles } from "lucide-react";
 import { toast } from "sonner";
 
 import { Button } from "@/components/ui/button";
@@ -104,25 +104,32 @@ function PaginaAuth() {
 
 
   return (
-    <div className="flex min-h-screen flex-col bg-background md:flex-row">
-      <div className="hidden flex-1 flex-col justify-between bg-secondary/60 p-12 md:flex">
-        <p className="text-xs font-medium uppercase tracking-[0.2em] text-muted-foreground">
-          Central de Preços
-        </p>
-        <div className="max-w-sm">
-          <h1 className="text-3xl font-semibold leading-tight tracking-tight text-foreground">
-            Inteligência de preços para o seu time comercial.
+    <div className="ambient-gradient flex min-h-screen flex-col bg-background md:flex-row">
+      <div className="relative hidden flex-1 flex-col justify-between overflow-hidden border-r border-border p-12 md:flex lg:p-16">
+        <div className="absolute inset-0 bg-secondary/20 backdrop-blur-3xl" />
+        <div className="relative flex items-center gap-3">
+          <div className="brand-gradient brand-glow flex size-10 items-center justify-center rounded-xl">
+            <Sparkles className="size-4 text-primary-foreground" />
+          </div>
+          <p className="text-sm font-semibold text-foreground">Central de Preços</p>
+        </div>
+        <div className="relative max-w-sm">
+          <div className="mb-5 flex w-fit items-center gap-2 rounded-full border border-primary/20 bg-primary/10 px-3 py-1.5 text-xs font-medium text-primary">
+            <ShieldCheck className="size-3.5" /> Ambiente seguro
+          </div>
+          <h1 className="text-4xl font-semibold leading-tight text-foreground lg:text-5xl">
+            Inteligência de preços para o seu <span className="text-gradient">time comercial.</span>
           </h1>
-          <p className="mt-4 text-sm leading-relaxed text-muted-foreground">
+          <p className="mt-5 max-w-xs text-sm leading-6 text-muted-foreground">
             Acesso exclusivo para a equipe interna. Novas contas são criadas apenas por
             administradores.
           </p>
         </div>
-        <p className="text-xs text-muted-foreground">Ambiente interno · uso restrito</p>
+        <p className="relative text-xs text-muted-foreground">Ambiente interno · uso restrito</p>
       </div>
 
       <div className="flex flex-1 items-center justify-center px-5 py-12 sm:px-10">
-        <div className="w-full max-w-sm">
+        <div className="glass-panel w-full max-w-md rounded-2xl p-6 sm:p-8">
           {modoInicial === null ? (
             <div className="flex justify-center py-10">
               <Loader2 className="size-5 animate-spin text-muted-foreground" />
@@ -130,10 +137,10 @@ function PaginaAuth() {
           ) : (
             <>
           <div className="mb-8">
-            <div className="mb-5 flex size-10 items-center justify-center rounded-xl bg-primary">
+            <div className="brand-gradient brand-glow mb-5 flex size-11 items-center justify-center rounded-xl">
               <Lock className="size-4 text-primary-foreground" />
             </div>
-            <h2 className="text-xl font-semibold tracking-tight text-foreground">
+            <h2 className="text-2xl font-semibold text-foreground">
               {modoInicial ? "Configuração inicial" : "Entrar"}
             </h2>
             <p className="mt-1.5 text-sm text-muted-foreground">

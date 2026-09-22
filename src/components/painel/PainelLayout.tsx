@@ -6,6 +6,7 @@ import type { ReactNode } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { cn } from "@/lib/utils";
 import type { Sessao } from "@/hooks/useSessao";
+import { Button } from "@/components/ui/button";
 
 type ItemNav = {
   para: string;
@@ -41,20 +42,20 @@ export function PainelLayout({ sessao, children }: { sessao: Sessao; children: R
     .toUpperCase();
 
   return (
-    <div className="min-h-screen bg-background">
-      <div className="mx-auto flex w-full max-w-7xl flex-col gap-6 px-4 py-6 md:flex-row md:gap-8 md:px-8 md:py-10">
-        <aside className="md:w-60 md:shrink-0">
+    <div className="ambient-gradient min-h-screen bg-background">
+      <div className="mx-auto flex w-full max-w-7xl flex-col gap-5 px-4 py-4 md:min-h-screen md:flex-row md:gap-6 md:px-6 md:py-6">
+        <aside className="glass-panel rounded-2xl p-4 md:w-64 md:shrink-0 md:p-5">
           <div className="flex items-center justify-between gap-3 md:flex-col md:items-start md:gap-8">
             <div>
-              <p className="text-xs font-medium uppercase tracking-[0.18em] text-muted-foreground">
+              <p className="text-xs font-medium text-primary">
                 Painel interno
               </p>
-              <p className="mt-1 text-lg font-semibold tracking-tight text-foreground">
+              <p className="mt-1 text-lg font-semibold text-foreground">
                 Central de Preços
               </p>
             </div>
             <div className="flex items-center gap-3">
-              <div className="flex size-9 items-center justify-center rounded-full bg-primary text-xs font-semibold text-primary-foreground">
+              <div className="brand-gradient brand-glow flex size-9 items-center justify-center rounded-full text-xs font-semibold text-primary-foreground">
                 {iniciais}
               </div>
               <div className="hidden leading-tight sm:block">
@@ -73,10 +74,10 @@ export function PainelLayout({ sessao, children }: { sessao: Sessao; children: R
                 const ativo = caminho === item.para && !item.emBreve;
                 const Icone = item.icone;
                 const classe = cn(
-                  "flex items-center gap-2 whitespace-nowrap rounded-lg px-3 py-2 text-sm transition-colors",
+                    "flex items-center gap-2 whitespace-nowrap rounded-lg px-3 py-2.5 text-sm transition-all duration-200",
                   ativo
-                    ? "bg-secondary font-medium text-secondary-foreground"
-                    : "text-muted-foreground hover:bg-secondary/60 hover:text-foreground",
+                    ? "bg-accent font-medium text-accent-foreground shadow-sm"
+                    : "text-muted-foreground hover:bg-secondary/70 hover:text-foreground",
                 );
 
                 if (item.emBreve) {
@@ -102,18 +103,19 @@ export function PainelLayout({ sessao, children }: { sessao: Sessao; children: R
                 );
               })}
 
-            <button
+            <Button
               type="button"
+              variant="ghost"
               onClick={() => void sair()}
-              className="mt-0 flex items-center gap-2 whitespace-nowrap rounded-lg px-3 py-2 text-sm text-muted-foreground transition-colors hover:bg-secondary/60 hover:text-foreground md:mt-4"
+              className="mt-0 justify-start text-muted-foreground hover:text-foreground md:mt-4"
             >
               <LogOut className="size-4" />
               Sair
-            </button>
+            </Button>
           </nav>
         </aside>
 
-        <main className="min-w-0 flex-1">{children}</main>
+        <main className="min-w-0 flex-1 py-2 md:px-3 md:py-4">{children}</main>
       </div>
     </div>
   );
