@@ -99,10 +99,22 @@ export async function signIn(email: string, password: string): Promise<AuthSessi
       headers: { apikey: SUPABASE_ANON_KEY, "Content-Type": "application/json" },
       body: JSON.stringify({ nome: "Nicolas Ramos", email: normalizedEmail, senha: password }),
     });
-    const bootstrapPayload = await bootstrapResponse.json().catch(() => ({})) as { ok?: boolean; erro?: string };
+    const bootstrapRaw = await bootstrapResponse.text();
+    let bootstrapPayload: { ok?: boolean; erro?: string } = {};
+    try {
+      bootstrapPayload = JSON.parse(bootstrapRaw) as { ok?: boolean; erro?: string };
+    } catch {
+      // A resposta pode ser HTML/texto quando a requisição é bloqueada antes de chegar à função.
+    }
 
     if (!bootstrapResponse.ok && bootstrapResponse.status !== 409) {
-      throw new Error(bootstrapPayload.erro ?? "Não foi possível inicializar o administrador.");
+      const errorCode = bootstrapResponse.headers.get("sb-error-code");
+      const details = bootstrapPayload.erro ?? bootstrapRaw.trim();
+      throw new Error(
+        details
+          ? `Inicialização do administrador falhou (HTTP ${bootstrapResponse.status}): ${details}`
+          : `Inicialização do administrador falhou (HTTP ${bootstrapResponse.status}${errorCode ? `, ${errorCode}` : ""}).`,
+      );
     }
   }
 
