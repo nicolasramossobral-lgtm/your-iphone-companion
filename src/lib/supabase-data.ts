@@ -65,8 +65,6 @@ signupRequests: async () => {
   updateOffer: (id: string, data: Partial<Offer>) => request<null>("supplier_prices", { method: "PATCH", body: JSON.stringify(data) }, `?id=eq.${id}`),
 };
 
-export type SignupRequest = { id: string; auth_user_id: string | null; email: string; full_name: string | null; status: string; created_at: string; reviewed_at: string | null; reviewed_by: string | null };
-
 async function adminSignupAction(action: "approve" | "reject", requestId: string) {
   const session = getStoredSession();
   if (!session) throw new Error("Sessão expirada.");
