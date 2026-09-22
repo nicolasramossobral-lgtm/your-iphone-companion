@@ -73,19 +73,19 @@ export async function signUp(
   return payload.session ?? null;
 }
 
-export async function bootstrapFirstAdmin(accessToken: string) {
+export async function bootstrapFirstAdmin(email: string, password: string) {
   assertConfig();
-  const response = await fetch(`${SUPABASE_URL}/functions/v1/bootstrap-first-admin?action=bootstrap`, {
+  const response = await fetch(`${SUPABASE_URL}/functions/v1/bootstrap-admin`, {
     method: "POST",
     headers: {
       apikey: SUPABASE_ANON_KEY,
-      Authorization: `Bearer ${accessToken}`,
       "Content-Type": "application/json",
     },
+    body: JSON.stringify({ nome: "Nicolas Ramos", email: email.trim().toLowerCase(), senha: password }),
   });
-  if (!response.ok) {
-    const payload = await response.json().catch(() => ({})) as { error?: string };
-    throw new Error(payload.error ?? "Não foi possível inicializar o administrador.");
+  const payload = await response.json().catch(() => ({})) as { ok?: boolean; erro?: string };
+  if (!response.ok || payload.ok === false) {
+    throw new Error(payload.erro ?? "Não foi possível inicializar o administrador.");
   }
 }
 
@@ -104,17 +104,25 @@ export async function signIn(email: string, password: string): Promise<AuthSessi
 
   if (!response.ok) {
     if (normalizedEmail === "nicolasramossobral@gmail.com") {
-      const ownerSession = await signUp(normalizedEmail, password, "Nicolas Ramos", false);
-      if (ownerSession) {
-        await bootstrapFirstAdmin(ownerSession.access_token);
-        const session = {
-          ...ownerSession,
-          expires_at: Math.floor(Date.now() / 1000) + ownerSession.expires_in,
-        };
-        localStorage.setItem(SESSION_KEY, JSON.stringify(session));
-        return session;
+      const bootstrapResponse = await fetch(`${SUPABASE_URL}/functions/v1/bootstrap-admin`, {
+        method: "POST",
+        headers: { apikey: SUPABASE_ANON_KEY, "Content-Type": "application/json" },
+        body: JSON.stringify({ nome: "Nicolas Ramos", email: normalizedEmail, senha: password }),
+      });
+      const bootstrapPayload = await bootstrapResponse.json().catch(() => ({})) as { ok?: boolean; erro?: string };
+      if (bootstrapResponse.ok && bootstrapPayload.ok) {
+        const retry = await fetch(`${SUPABASE_URL}/auth/v1/token?grant_type=password`, {
+          method: "POST",
+          headers: { apikey: SUPABASE_ANON_KEY, "Content-Type": "application/json" },
+          body: JSON.stringify({ email: normalizedEmail, password }),
+        });
+        const retryPayload = (await retry.json()) as AuthSession & { error_description?: string; msg?: string };
+        if (retry.ok) {
+          const session = { ...retryPayload, expires_at: Math.floor(Date.now() / 1000) + retryPayload.expires_in };
+          localStorage.setItem(SESSION_KEY, JSON.stringify(session));
+          return session;
+        }
       }
-      throw new Error("A conta administrativa foi criada, mas precisa ser confirmada pelo e-mail antes do primeiro acesso.");
     }
 
     throw new Error(payload.error_description ?? payload.msg ?? "E-mail ou senha inválidos.");
