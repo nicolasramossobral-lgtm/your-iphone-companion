@@ -46,6 +46,7 @@ function Cadastro() {
         </form>
         <p className="mt-6 text-center text-xs text-blue-100/55">A senha é processada pelo Supabase Auth e não fica disponível para o administrador.</p>
       </div>
+      </div>
     </main>
   );
 }
