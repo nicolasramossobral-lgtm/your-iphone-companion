@@ -189,7 +189,10 @@ function PaginaAuth() {
               Não há cadastro público. Solicite acesso a um administrador.
             </p>
           )}
+            </>
+          )}
         </div>
+
       </div>
     </div>
   );
