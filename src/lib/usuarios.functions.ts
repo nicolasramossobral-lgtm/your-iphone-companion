@@ -190,15 +190,15 @@ const esquemaBootstrap = z.object({
  */
 export const criarPrimeiroAdmin = createServerFn({ method: "POST" })
   .inputValidator((input: unknown) => esquemaBootstrap.parse(input))
-  .handler(async ({ data }) => {
+  .handler(async ({ data }): Promise<ResultadoOperacao> => {
     const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
 
     const { count, error: erroContagem } = await supabaseAdmin
       .from("profiles")
       .select("id", { count: "exact", head: true });
-    if (erroContagem) throw new Error("Não foi possível verificar o estado inicial.");
+    if (erroContagem) return { ok: false, erro: "Não foi possível verificar o estado inicial." };
     if ((count ?? 0) > 0) {
-      throw new Error("A configuração inicial já foi concluída.");
+      return { ok: false, erro: "A configuração inicial já foi concluída." };
     }
 
     const { data: criado, error } = await supabaseAdmin.auth.admin.createUser({
@@ -208,8 +208,9 @@ export const criarPrimeiroAdmin = createServerFn({ method: "POST" })
       user_metadata: { nome: data.nome },
     });
     if (error || !criado.user) {
-      throw new Error(error?.message ?? "Não foi possível criar o administrador.");
+      return { ok: false, erro: traduzirErroSenha(error?.message) };
     }
+
 
     await supabaseAdmin
       .from("profiles")
