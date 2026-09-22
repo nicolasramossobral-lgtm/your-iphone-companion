@@ -20,6 +20,26 @@ type ContextoAutenticado = {
   supabase: SupabaseClient<Database>;
   userId: string;
 };
+export type ResultadoOperacao = { ok: boolean; erro?: string };
+
+/**
+ * O middleware de erro do servidor transforma exceções em uma página HTML 500,
+ * o que deixaria a tela em branco no cliente. Por isso falhas esperadas são
+ * devolvidas como resultado, nunca lançadas.
+ */
+function traduzirErroSenha(mensagem?: string): string {
+  const texto = mensagem ?? "Não foi possível concluir a operação.";
+  if (/weak|easy to guess|pwned|leaked/i.test(texto)) {
+    return "Esta senha é fraca ou já apareceu em vazamentos. Use ao menos 10 caracteres com letras, números e símbolos.";
+  }
+  if (/already registered|already been registered|exists/i.test(texto)) {
+    return "Já existe uma conta com este e-mail.";
+  }
+  if (/password/i.test(texto) && /short|least/i.test(texto)) {
+    return "A senha é curta demais. Use ao menos 8 caracteres.";
+  }
+  return texto;
+}
 
 
 async function garantirAdmin(context: ContextoAutenticado) {
