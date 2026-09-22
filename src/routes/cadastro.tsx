@@ -26,16 +26,18 @@ function Cadastro() {
   }
 
   return (
-    <main className="min-h-screen bg-[#05091f] px-5 py-10 text-white">
-      <div className="mx-auto max-w-lg rounded-[28px] border border-violet-500/70 bg-slate-950/70 p-7 shadow-[0_0_55px_rgba(99,102,241,0.22)] backdrop-blur-xl sm:p-10">
-        <a href="/" className="mb-8 inline-flex items-center gap-2 text-sm text-blue-200 hover:text-white"><ArrowLeft className="h-4 w-4" /> Voltar para o login</a>
+    <main className="relative min-h-screen overflow-hidden bg-[#05091f] px-5 py-10 text-white">
+      <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(circle_at_15%_20%,rgba(124,58,237,0.28),transparent_30%),radial-gradient(circle_at_78%_72%,rgba(37,99,235,0.2),transparent_34%),linear-gradient(135deg,#07113b_0%,#05091f_48%,#0a0630_100%)]" />
+      <div className="relative">
+      <div className="mx-auto max-w-lg rounded-[28px] border border-violet-500/80 bg-slate-950/55 p-7 shadow-[0_0_55px_rgba(99,102,241,0.22)] backdrop-blur-xl sm:p-10">
+        <a href="/" className="mb-8 inline-flex items-center gap-2 text-sm text-blue-200/80 hover:text-white"><ArrowLeft className="h-4 w-4" /> Voltar para o login</a>
         <div className="mb-8 text-center">
-          <div className="mx-auto mb-4 flex h-14 w-14 items-center justify-center rounded-2xl bg-gradient-to-br from-violet-600 to-cyan-500"><UserPlus className="h-7 w-7" /></div>
+          <div className="mx-auto mb-4 flex h-14 w-14 items-center justify-center rounded-2xl border border-violet-400/60 bg-gradient-to-br from-violet-600/70 via-blue-600/50 to-cyan-400/30 shadow-[0_0_35px_rgba(99,102,241,0.4)]"><UserPlus className="h-7 w-7" /></div>
           <h1 className="text-3xl font-bold">Solicitar acesso</h1>
           <p className="mt-2 text-sm text-blue-100/70">Cadastre seus dados. O administrador aprovará ou recusará o acesso.</p>
         </div>
         <form onSubmit={submit} className="space-y-5">
-          <input required value={name} onChange={e => setName(e.target.value)} placeholder="Nome completo" className="h-14 w-full rounded-2xl border border-indigo-500/45 bg-indigo-950/45 px-4 text-white outline-none focus:border-cyan-400" />
+          <input required value={name} onChange={e => setName(e.target.value)} placeholder="Nome completo" className="h-14 w-full rounded-2xl border border-indigo-500/45 bg-indigo-950/45 px-4 text-white outline-none focus:border-cyan-400 focus:ring-2 focus:ring-cyan-400/15" />
           <input required type="email" value={email} onChange={e => setEmail(e.target.value)} placeholder="E-mail" className="h-14 w-full rounded-2xl border border-indigo-500/45 bg-indigo-950/45 px-4 text-white outline-none focus:border-cyan-400" />
           <input required minLength={6} type="password" value={password} onChange={e => setPassword(e.target.value)} placeholder="Crie sua senha" className="h-14 w-full rounded-2xl border border-indigo-500/45 bg-indigo-950/45 px-4 text-white outline-none focus:border-cyan-400" />
           {error && <p className="rounded-xl border border-red-500/50 bg-red-950/40 px-4 py-3 text-sm text-red-300">{error}</p>}
