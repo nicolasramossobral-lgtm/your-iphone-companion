@@ -16,6 +16,11 @@ export type AuthSession = {
 
 const SESSION_KEY = "your-iphone-companion.auth";
 
+function assertConfig() {
+  if (!SUPABASE_URL || !SUPABASE_ANON_KEY) {
+    throw new Error("Supabase não está configurado neste ambiente.");
+  }
+}
 
 export async function signIn(email: string, password: string): Promise<AuthSession> {
   assertConfig();
