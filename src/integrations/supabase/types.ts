@@ -14,12 +14,101 @@ export type Database = {
   }
   public: {
     Tables: {
+      fornecedor_contatos: {
+        Row: {
+          created_at: string
+          email: string | null
+          fornecedor_id: string
+          id: string
+          nome: string | null
+          telefone: string | null
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          email?: string | null
+          fornecedor_id: string
+          id?: string
+          nome?: string | null
+          telefone?: string | null
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          email?: string | null
+          fornecedor_id?: string
+          id?: string
+          nome?: string | null
+          telefone?: string | null
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "fornecedor_contatos_fornecedor_id_fkey"
+            columns: ["fornecedor_id"]
+            isOneToOne: true
+            referencedRelation: "fornecedores"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      fornecedor_enderecos: {
+        Row: {
+          bairro: string | null
+          cep: string | null
+          cidade: string | null
+          complemento: string | null
+          created_at: string
+          fornecedor_id: string
+          id: string
+          logradouro: string | null
+          numero: string | null
+          uf: string | null
+          updated_at: string
+        }
+        Insert: {
+          bairro?: string | null
+          cep?: string | null
+          cidade?: string | null
+          complemento?: string | null
+          created_at?: string
+          fornecedor_id: string
+          id?: string
+          logradouro?: string | null
+          numero?: string | null
+          uf?: string | null
+          updated_at?: string
+        }
+        Update: {
+          bairro?: string | null
+          cep?: string | null
+          cidade?: string | null
+          complemento?: string | null
+          created_at?: string
+          fornecedor_id?: string
+          id?: string
+          logradouro?: string | null
+          numero?: string | null
+          uf?: string | null
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "fornecedor_enderecos_fornecedor_id_fkey"
+            columns: ["fornecedor_id"]
+            isOneToOne: true
+            referencedRelation: "fornecedores"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       fornecedores: {
         Row: {
           ativo: boolean
           created_at: string
           id: string
           nome: string
+          observacoes: string | null
           updated_at: string
         }
         Insert: {
@@ -27,6 +116,7 @@ export type Database = {
           created_at?: string
           id?: string
           nome: string
+          observacoes?: string | null
           updated_at?: string
         }
         Update: {
@@ -34,6 +124,7 @@ export type Database = {
           created_at?: string
           id?: string
           nome?: string
+          observacoes?: string | null
           updated_at?: string
         }
         Relationships: []
@@ -50,6 +141,7 @@ export type Database = {
           preco: number
           produto_id: string
           updated_at: string
+          variante_id: string | null
         }
         Insert: {
           coletado_em?: string
@@ -62,6 +154,7 @@ export type Database = {
           preco: number
           produto_id: string
           updated_at?: string
+          variante_id?: string | null
         }
         Update: {
           coletado_em?: string
@@ -74,6 +167,7 @@ export type Database = {
           preco?: number
           produto_id?: string
           updated_at?: string
+          variante_id?: string | null
         }
         Relationships: [
           {
@@ -90,10 +184,94 @@ export type Database = {
             referencedRelation: "produtos"
             referencedColumns: ["id"]
           },
+          {
+            foreignKeyName: "ofertas_variante_id_fkey"
+            columns: ["variante_id"]
+            isOneToOne: false
+            referencedRelation: "produto_variantes"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      preco_historico: {
+        Row: {
+          disponivel: boolean
+          estoque: number
+          id: string
+          oferta_id: string
+          preco: number
+          registrado_em: string
+        }
+        Insert: {
+          disponivel: boolean
+          estoque: number
+          id?: string
+          oferta_id: string
+          preco: number
+          registrado_em?: string
+        }
+        Update: {
+          disponivel?: boolean
+          estoque?: number
+          id?: string
+          oferta_id?: string
+          preco?: number
+          registrado_em?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "preco_historico_oferta_id_fkey"
+            columns: ["oferta_id"]
+            isOneToOne: false
+            referencedRelation: "ofertas"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      produto_variantes: {
+        Row: {
+          ativo: boolean
+          capacidade: string
+          condicao: string
+          cor: string
+          created_at: string
+          id: string
+          produto_id: string
+          updated_at: string
+        }
+        Insert: {
+          ativo?: boolean
+          capacidade: string
+          condicao: string
+          cor: string
+          created_at?: string
+          id?: string
+          produto_id: string
+          updated_at?: string
+        }
+        Update: {
+          ativo?: boolean
+          capacidade?: string
+          condicao?: string
+          cor?: string
+          created_at?: string
+          id?: string
+          produto_id?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "produto_variantes_produto_id_fkey"
+            columns: ["produto_id"]
+            isOneToOne: false
+            referencedRelation: "produtos"
+            referencedColumns: ["id"]
+          },
         ]
       }
       produtos: {
         Row: {
+          ativo: boolean
           capacidade: string
           cor: string
           created_at: string
@@ -102,6 +280,7 @@ export type Database = {
           updated_at: string
         }
         Insert: {
+          ativo?: boolean
           capacidade: string
           cor: string
           created_at?: string
@@ -110,6 +289,7 @@ export type Database = {
           updated_at?: string
         }
         Update: {
+          ativo?: boolean
           capacidade?: string
           cor?: string
           created_at?: string
