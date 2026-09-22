@@ -1,9 +1,5 @@
-export const SUPABASE_URL =
-  (import.meta.env.VITE_SUPABASE_URL as string | undefined) ??
-  "https://flvlopkobywrnttkeedj.supabase.co";
-export const SUPABASE_ANON_KEY =
-  (import.meta.env.VITE_SUPABASE_ANON_KEY as string | undefined) ??
-  "sb_publishable_mWdQ54O_V2N2yiiURAIMvMg_671m1Ieo";
+export const SUPABASE_URL = "https://flvlopkobywrnttkeedj.supabase.co";
+export const SUPABASE_ANON_KEY = "sb_publishable_mWdQ54O_V2N2yiiURAIMvMg_671m1Ieo";
 
 export type AuthSession = {
   access_token: string;
