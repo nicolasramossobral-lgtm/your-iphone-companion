@@ -1,5 +1,5 @@
 import { createFileRoute } from "@tanstack/react-router";
-import { ArrowRight, Eye, EyeOff, LockKeyhole, Mail, Smartphone } from "lucide-react";
+import { ArrowRight, Eye, EyeOff, LockKeyhole, Mail, Smartphone, UserPlus } from "lucide-react";
 import { FormEvent, useState } from "react";
 import { resetPassword, signIn } from "../lib/supabase-auth";
 
