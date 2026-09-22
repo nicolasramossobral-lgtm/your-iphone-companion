@@ -144,6 +144,8 @@
 }
 
 
+/* Shared brand direction: the login palette is the visual source of truth for the full app. */
+
 /* Remove the Lovable branding widget from every page. */
 #lovable-badge {
   display: none !important;
