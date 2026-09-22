@@ -1,7 +1,9 @@
 import { createServerFn } from "@tanstack/react-start";
+import type { SupabaseClient } from "@supabase/supabase-js";
 import { z } from "zod";
 
 import { requireSupabaseAuth } from "@/integrations/supabase/auth-middleware";
+import type { Database } from "@/integrations/supabase/types";
 
 export type PapelApp = "admin" | "vendedor";
 
@@ -15,14 +17,10 @@ export type UsuarioInterno = {
 };
 
 type ContextoAutenticado = {
-  supabase: Awaited<ReturnType<typeof criarTipoFalso>>;
+  supabase: SupabaseClient<Database>;
   userId: string;
 };
 
-// Apenas para inferência de tipo do cliente do middleware.
-declare function criarTipoFalso(): Promise<
-  import("@supabase/supabase-js").SupabaseClient<import("@/integrations/supabase/types").Database>
->;
 
 async function garantirAdmin(context: ContextoAutenticado) {
   const { data, error } = await context.supabase.rpc("is_active_admin", {
