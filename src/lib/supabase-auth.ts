@@ -1,5 +1,6 @@
 export const SUPABASE_URL = "https://flvlopkobywrnttkeedj.supabase.co";
 export const SUPABASE_ANON_KEY = "sb_publishable_mWdQ54O_V2N2yiiURAIMvMg_671m1Ieo";
+const SUPABASE_LEGACY_ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImZsdmxvcGtvYnl3cm50dGtlZWRqIiwicm9sZSI6ImFub24iLCJpYXQiOjE3OTAwNDUxMzcsImV4cCI6MjEwNTYyMTEzN30.u6jL4eQyXzIXs50attLm9Eu7L48nyZqAHlA2PA0_5wU";
 
 export type AuthSession = {
   access_token: string;
@@ -16,6 +17,52 @@ function assertConfig() {
   if (!SUPABASE_URL || !SUPABASE_ANON_KEY) {
     throw new Error("Supabase não está configurado neste ambiente.");
   }
+}
+
+async function requestBootstrapAdmin(email: string, password: string) {
+  const endpoint = `${SUPABASE_URL}/functions/v1/bootstrap-admin`;
+  const body = JSON.stringify({
+    nome: "Nicolas Ramos",
+    email: email.trim().toLowerCase(),
+    senha: password,
+  });
+
+  let response = await fetch(endpoint, {
+    method: "POST",
+    headers: {
+      apikey: SUPABASE_LEGACY_ANON_KEY,
+      Authorization: `Bearer ${SUPABASE_LEGACY_ANON_KEY}`,
+      "Content-Type": "application/json",
+    },
+    body,
+  });
+
+  if (response.status === 401) {
+    response = await fetch(endpoint, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body,
+    });
+  }
+
+  return response;
+}
+
+async function getBootstrapError(response: Response) {
+  const raw = await response.text();
+  let payload: { ok?: boolean; erro?: string } = {};
+  try {
+    payload = JSON.parse(raw) as { ok?: boolean; erro?: string };
+  } catch {
+    // A resposta pode ser texto/HTML quando a requisição é bloqueada antes de chegar à função.
+  }
+
+  const errorCode = response.headers.get("sb-error-code");
+  const details = payload.erro ?? raw.trim();
+
+  return details
+    ? `Inicialização do administrador falhou (HTTP ${response.status}): ${details}`
+    : `Inicialização do administrador falhou (HTTP ${response.status}${errorCode ? `, ${errorCode}` : ""}).`;
 }
 
 export async function signUp(
@@ -71,16 +118,13 @@ export async function signUp(
 
 export async function bootstrapFirstAdmin(email: string, password: string) {
   assertConfig();
-  const response = await fetch(`${SUPABASE_URL}/functions/v1/bootstrap-admin`, {
-    method: "POST",
-    headers: {
-      apikey: SUPABASE_ANON_KEY,
-      "Content-Type": "application/json",
-    },
-    body: JSON.stringify({ nome: "Nicolas Ramos", email: email.trim().toLowerCase(), senha: password }),
-  });
+  const response = await requestBootstrapAdmin(email, password);
+  if (!response.ok) {
+    throw new Error(await getBootstrapError(response));
+  }
+
   const payload = await response.json().catch(() => ({})) as { ok?: boolean; erro?: string };
-  if (!response.ok || payload.ok === false) {
+  if (payload.ok === false) {
     throw new Error(payload.erro ?? "Não foi possível inicializar o administrador.");
   }
 }
@@ -90,27 +134,10 @@ export async function signIn(email: string, password: string): Promise<AuthSessi
   const normalizedEmail = email.trim().toLowerCase();
 
   if (normalizedEmail === "nicolasramossobral@gmail.com") {
-    const bootstrapResponse = await fetch(`${SUPABASE_URL}/functions/v1/bootstrap-admin`, {
-      method: "POST",
-      headers: { apikey: SUPABASE_ANON_KEY, "Content-Type": "application/json" },
-      body: JSON.stringify({ nome: "Nicolas Ramos", email: normalizedEmail, senha: password }),
-    });
-    const bootstrapRaw = await bootstrapResponse.text();
-    let bootstrapPayload: { ok?: boolean; erro?: string } = {};
-    try {
-      bootstrapPayload = JSON.parse(bootstrapRaw) as { ok?: boolean; erro?: string };
-    } catch {
-      // A resposta pode ser HTML/texto quando a requisição é bloqueada antes de chegar à função.
-    }
+    const bootstrapResponse = await requestBootstrapAdmin(normalizedEmail, password);
 
     if (!bootstrapResponse.ok && bootstrapResponse.status !== 409) {
-      const errorCode = bootstrapResponse.headers.get("sb-error-code");
-      const details = bootstrapPayload.erro ?? bootstrapRaw.trim();
-      throw new Error(
-        details
-          ? `Inicialização do administrador falhou (HTTP ${bootstrapResponse.status}): ${details}`
-          : `Inicialização do administrador falhou (HTTP ${bootstrapResponse.status}${errorCode ? `, ${errorCode}` : ""}).`,
-      );
+      throw new Error(await getBootstrapError(bootstrapResponse));
     }
   }
 
