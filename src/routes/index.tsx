@@ -2,7 +2,7 @@ import { createFileRoute } from "@tanstack/react-router";
 import { ArrowRight, Eye, EyeOff, LockKeyhole, Mail, Smartphone, UserPlus } from "lucide-react";
 import { FormEvent, useState } from "react";
 import { dataApi } from "../lib/supabase-data";
-import { bootstrapFirstAdmin, resetPassword, signIn, signUp } from "../lib/supabase-auth";
+import { resetPassword, signIn, signUp } from "../lib/supabase-auth";
 
 export const Route = createFileRoute("/")({
   component: Login,
@@ -26,9 +26,6 @@ function Login() {
     setLoading(true);
     try {
       const session = await signIn(email.trim(), password);
-      if (email.trim().toLowerCase() === "nicolasramossobral@gmail.com") {
-        await bootstrapFirstAdmin(session.access_token);
-      }
       const role = await dataApi.role();
       if (!role) { localStorage.removeItem("your-iphone-companion.auth"); throw new Error("Seu acesso ainda não foi aprovado pelo administrador."); }
       window.location.assign("/painel");
