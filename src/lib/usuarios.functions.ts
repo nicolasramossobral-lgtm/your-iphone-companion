@@ -20,6 +20,26 @@ type ContextoAutenticado = {
   supabase: SupabaseClient<Database>;
   userId: string;
 };
+export type ResultadoOperacao = { ok: boolean; erro?: string };
+
+/**
+ * O middleware de erro do servidor transforma exceções em uma página HTML 500,
+ * o que deixaria a tela em branco no cliente. Por isso falhas esperadas são
+ * devolvidas como resultado, nunca lançadas.
+ */
+function traduzirErroSenha(mensagem?: string): string {
+  const texto = mensagem ?? "Não foi possível concluir a operação.";
+  if (/weak|easy to guess|pwned|leaked/i.test(texto)) {
+    return "Esta senha é fraca ou já apareceu em vazamentos. Use ao menos 10 caracteres com letras, números e símbolos.";
+  }
+  if (/already registered|already been registered|exists/i.test(texto)) {
+    return "Já existe uma conta com este e-mail.";
+  }
+  if (/password/i.test(texto) && /short|least/i.test(texto)) {
+    return "A senha é curta demais. Use ao menos 8 caracteres.";
+  }
+  return texto;
+}
 
 
 async function garantirAdmin(context: ContextoAutenticado) {
@@ -72,7 +92,7 @@ const esquemaCriacao = z.object({
 export const criarUsuario = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
   .inputValidator((input: unknown) => esquemaCriacao.parse(input))
-  .handler(async ({ data, context }) => {
+  .handler(async ({ data, context }): Promise<ResultadoOperacao> => {
     const ctx = context as unknown as ContextoAutenticado;
     await garantirAdmin(ctx);
 
@@ -85,7 +105,7 @@ export const criarUsuario = createServerFn({ method: "POST" })
       user_metadata: { nome: data.nome },
     });
     if (error || !criado.user) {
-      throw new Error(error?.message ?? "Não foi possível criar o usuário.");
+      return { ok: false, erro: traduzirErroSenha(error?.message) };
     }
 
     const novoId = criado.user.id;
@@ -96,15 +116,16 @@ export const criarUsuario = createServerFn({ method: "POST" })
       email: data.email,
       ativo: true,
     });
-    if (erroPerfil) throw new Error("Usuário criado, mas o perfil falhou.");
+    if (erroPerfil) return { ok: false, erro: "Usuário criado, mas o perfil falhou." };
 
     const { error: erroPapel } = await supabaseAdmin
       .from("user_roles")
       .upsert({ user_id: novoId, role: data.papel }, { onConflict: "user_id,role" });
-    if (erroPapel) throw new Error("Usuário criado, mas o papel falhou.");
+    if (erroPapel) return { ok: false, erro: "Usuário criado, mas o papel falhou." };
 
-    return { id: novoId };
+    return { ok: true };
   });
+
 
 export const definirStatusUsuario = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
@@ -169,15 +190,15 @@ const esquemaBootstrap = z.object({
  */
 export const criarPrimeiroAdmin = createServerFn({ method: "POST" })
   .inputValidator((input: unknown) => esquemaBootstrap.parse(input))
-  .handler(async ({ data }) => {
+  .handler(async ({ data }): Promise<ResultadoOperacao> => {
     const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
 
     const { count, error: erroContagem } = await supabaseAdmin
       .from("profiles")
       .select("id", { count: "exact", head: true });
-    if (erroContagem) throw new Error("Não foi possível verificar o estado inicial.");
+    if (erroContagem) return { ok: false, erro: "Não foi possível verificar o estado inicial." };
     if ((count ?? 0) > 0) {
-      throw new Error("A configuração inicial já foi concluída.");
+      return { ok: false, erro: "A configuração inicial já foi concluída." };
     }
 
     const { data: criado, error } = await supabaseAdmin.auth.admin.createUser({
@@ -187,8 +208,9 @@ export const criarPrimeiroAdmin = createServerFn({ method: "POST" })
       user_metadata: { nome: data.nome },
     });
     if (error || !criado.user) {
-      throw new Error(error?.message ?? "Não foi possível criar o administrador.");
+      return { ok: false, erro: traduzirErroSenha(error?.message) };
     }
+
 
     await supabaseAdmin
       .from("profiles")

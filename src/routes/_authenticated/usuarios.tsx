@@ -74,7 +74,11 @@ function GestaoUsuarios() {
 
   const mutCriar = useMutation({
     mutationFn: () => criar({ data: { nome, email, senha, papel } }),
-    onSuccess: () => {
+    onSuccess: (resultado) => {
+      if (!resultado.ok) {
+        toast.error(resultado.erro ?? "Não foi possível criar o usuário.");
+        return;
+      }
       toast.success("Usuário criado.");
       setNome("");
       setEmail("");
@@ -84,6 +88,7 @@ function GestaoUsuarios() {
     },
     onError: aoFalhar,
   });
+
 
   const mutStatus = useMutation({
     mutationFn: (v: { userId: string; ativo: boolean }) => alterarStatus({ data: v }),

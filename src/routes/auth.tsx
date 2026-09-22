@@ -82,7 +82,11 @@ function PaginaAuth() {
     e.preventDefault();
     setEnviando(true);
     try {
-      await criarPrimeiroAdmin({ data: { nome, email, senha } });
+      const resultado = await criarPrimeiroAdmin({ data: { nome, email, senha } });
+      if (!resultado.ok) {
+        toast.error(resultado.erro ?? "Não foi possível concluir.");
+        return;
+      }
       toast.success("Administrador criado. Entrando...");
       setModoInicial(false);
       const { error } = await supabase.auth.signInWithPassword({ email, password: senha });
@@ -91,12 +95,13 @@ function PaginaAuth() {
         return;
       }
       navigate({ to: "/painel", replace: true });
-    } catch (erro) {
-      toast.error(erro instanceof Error ? erro.message : "Não foi possível concluir.");
+    } catch {
+      toast.error("Não foi possível concluir. Tente novamente.");
     } finally {
       setEnviando(false);
     }
   }
+
 
   return (
     <div className="flex min-h-screen flex-col bg-background md:flex-row">
@@ -172,11 +177,18 @@ function PaginaAuth() {
                 type="password"
                 value={senha}
                 onChange={(e) => setSenha(e.target.value)}
-                autoComplete="current-password"
-                minLength={8}
+                autoComplete={modoInicial ? "new-password" : "current-password"}
+                minLength={modoInicial ? 10 : 8}
                 required
               />
+              {modoInicial && (
+                <p className="text-xs text-muted-foreground">
+                  Use ao menos 10 caracteres com letras, números e símbolos. Senhas comuns ou
+                  presentes em vazamentos são recusadas.
+                </p>
+              )}
             </div>
+
 
             <Button type="submit" className="w-full" disabled={enviando || modoInicial === null}>
               {enviando && <Loader2 className="mr-2 size-4 animate-spin" />}
