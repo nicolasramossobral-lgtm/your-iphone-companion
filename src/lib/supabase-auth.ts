@@ -122,6 +122,8 @@ export async function signIn(email: string, password: string): Promise<AuthSessi
           localStorage.setItem(SESSION_KEY, JSON.stringify(session));
           return session;
         }
+      } else if (bootstrapPayload.erro) {
+        throw new Error(bootstrapPayload.erro);
       }
     }
 
