@@ -15,6 +15,13 @@
       "when": 1790052553893,
       "tag": "0001_remove_auth_trigger",
       "breakpoints": true
+    },
+    {
+      "idx": 2,
+      "version": "7",
+      "when": 1790086114408,
+      "tag": "0002_create_dashboard_catalog",
+      "breakpoints": true
     }
   ]
 }

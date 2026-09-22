@@ -14,6 +14,111 @@ export type Database = {
   }
   public: {
     Tables: {
+      fornecedores: {
+        Row: {
+          ativo: boolean
+          created_at: string
+          id: string
+          nome: string
+          updated_at: string
+        }
+        Insert: {
+          ativo?: boolean
+          created_at?: string
+          id?: string
+          nome: string
+          updated_at?: string
+        }
+        Update: {
+          ativo?: boolean
+          created_at?: string
+          id?: string
+          nome?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
+      ofertas: {
+        Row: {
+          coletado_em: string
+          condicao: string
+          created_at: string
+          disponivel: boolean
+          estoque: number
+          fornecedor_id: string
+          id: string
+          preco: number
+          produto_id: string
+          updated_at: string
+        }
+        Insert: {
+          coletado_em?: string
+          condicao: string
+          created_at?: string
+          disponivel?: boolean
+          estoque?: number
+          fornecedor_id: string
+          id?: string
+          preco: number
+          produto_id: string
+          updated_at?: string
+        }
+        Update: {
+          coletado_em?: string
+          condicao?: string
+          created_at?: string
+          disponivel?: boolean
+          estoque?: number
+          fornecedor_id?: string
+          id?: string
+          preco?: number
+          produto_id?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "ofertas_fornecedor_id_fkey"
+            columns: ["fornecedor_id"]
+            isOneToOne: false
+            referencedRelation: "fornecedores"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "ofertas_produto_id_fkey"
+            columns: ["produto_id"]
+            isOneToOne: false
+            referencedRelation: "produtos"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      produtos: {
+        Row: {
+          capacidade: string
+          cor: string
+          created_at: string
+          id: string
+          modelo: string
+          updated_at: string
+        }
+        Insert: {
+          capacidade: string
+          cor: string
+          created_at?: string
+          id?: string
+          modelo: string
+          updated_at?: string
+        }
+        Update: {
+          capacidade?: string
+          cor?: string
+          created_at?: string
+          id?: string
+          modelo?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
       profiles: {
         Row: {
           ativo: boolean
