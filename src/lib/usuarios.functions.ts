@@ -50,6 +50,16 @@ async function garantirAdmin(context: ContextoAutenticado) {
   if (!data) throw new Error("Acesso restrito a administradores ativos.");
 }
 
+/** Valida admin sem lançar, para operações que devolvem resultado. */
+async function checarAdmin(context: ContextoAutenticado): Promise<string | null> {
+  const { data, error } = await context.supabase.rpc("is_active_admin", {
+    _user_id: context.userId,
+  });
+  if (error) return "Não foi possível validar suas permissões.";
+  if (!data) return "Acesso restrito a administradores ativos.";
+  return null;
+}
+
 export const listarUsuarios = createServerFn({ method: "GET" })
   .middleware([requireSupabaseAuth])
   .handler(async ({ context }): Promise<UsuarioInterno[]> => {
@@ -94,9 +104,11 @@ export const criarUsuario = createServerFn({ method: "POST" })
   .inputValidator((input: unknown) => esquemaCriacao.parse(input))
   .handler(async ({ data, context }): Promise<ResultadoOperacao> => {
     const ctx = context as unknown as ContextoAutenticado;
-    await garantirAdmin(ctx);
+    const semPermissao = await checarAdmin(ctx);
+    if (semPermissao) return { ok: false, erro: semPermissao };
 
     const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
+
 
     const { data: criado, error } = await supabaseAdmin.auth.admin.createUser({
       email: data.email,
@@ -116,12 +128,20 @@ export const criarUsuario = createServerFn({ method: "POST" })
       email: data.email,
       ativo: true,
     });
-    if (erroPerfil) return { ok: false, erro: "Usuário criado, mas o perfil falhou." };
+    if (erroPerfil) {
+      // Sem perfil a conta ficaria inutilizável: desfaz a criação.
+      await supabaseAdmin.auth.admin.deleteUser(novoId);
+      return { ok: false, erro: "Não foi possível criar o usuário. Tente novamente." };
+    }
 
     const { error: erroPapel } = await supabaseAdmin
       .from("user_roles")
       .upsert({ user_id: novoId, role: data.papel }, { onConflict: "user_id,role" });
-    if (erroPapel) return { ok: false, erro: "Usuário criado, mas o papel falhou." };
+    if (erroPapel) {
+      await supabaseAdmin.from("profiles").delete().eq("id", novoId);
+      await supabaseAdmin.auth.admin.deleteUser(novoId);
+      return { ok: false, erro: "Não foi possível definir o papel. Tente novamente." };
+    }
 
     return { ok: true };
   });
@@ -132,19 +152,20 @@ export const definirStatusUsuario = createServerFn({ method: "POST" })
   .inputValidator((input: unknown) =>
     z.object({ userId: z.string().uuid(), ativo: z.boolean() }).parse(input),
   )
-  .handler(async ({ data, context }) => {
+  .handler(async ({ data, context }): Promise<ResultadoOperacao> => {
     const ctx = context as unknown as ContextoAutenticado;
-    await garantirAdmin(ctx);
+    const semPermissao = await checarAdmin(ctx);
+    if (semPermissao) return { ok: false, erro: semPermissao };
 
     if (data.userId === ctx.userId && !data.ativo) {
-      throw new Error("Você não pode desativar a própria conta.");
+      return { ok: false, erro: "Você não pode desativar a própria conta." };
     }
 
     const { error } = await ctx.supabase
       .from("profiles")
       .update({ ativo: data.ativo })
       .eq("id", data.userId);
-    if (error) throw new Error("Não foi possível atualizar o status.");
+    if (error) return { ok: false, erro: "Não foi possível atualizar o status." };
 
     return { ok: true };
   });
@@ -154,26 +175,29 @@ export const definirPapelUsuario = createServerFn({ method: "POST" })
   .inputValidator((input: unknown) =>
     z.object({ userId: z.string().uuid(), papel: z.enum(["admin", "vendedor"]) }).parse(input),
   )
-  .handler(async ({ data, context }) => {
+  .handler(async ({ data, context }): Promise<ResultadoOperacao> => {
     const ctx = context as unknown as ContextoAutenticado;
-    await garantirAdmin(ctx);
+    const semPermissao = await checarAdmin(ctx);
+    if (semPermissao) return { ok: false, erro: semPermissao };
 
     if (data.userId === ctx.userId && data.papel !== "admin") {
-      throw new Error("Você não pode remover o próprio acesso de administrador.");
+      return { ok: false, erro: "Você não pode remover o próprio acesso de administrador." };
     }
 
     const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
 
+    // Insere o novo papel primeiro: se a remoção falhar, o usuário nunca fica sem acesso.
+    const { error: erroInserir } = await supabaseAdmin
+      .from("user_roles")
+      .upsert({ user_id: data.userId, role: data.papel }, { onConflict: "user_id,role" });
+    if (erroInserir) return { ok: false, erro: "Não foi possível atribuir o novo papel." };
+
     const { error: erroRemover } = await supabaseAdmin
       .from("user_roles")
       .delete()
-      .eq("user_id", data.userId);
-    if (erroRemover) throw new Error("Não foi possível atualizar o papel.");
-
-    const { error } = await supabaseAdmin
-      .from("user_roles")
-      .insert({ user_id: data.userId, role: data.papel });
-    if (error) throw new Error("Não foi possível atribuir o novo papel.");
+      .eq("user_id", data.userId)
+      .neq("role", data.papel);
+    if (erroRemover) return { ok: false, erro: "Papel atribuído, mas o antigo não foi removido." };
 
     return { ok: true };
   });
