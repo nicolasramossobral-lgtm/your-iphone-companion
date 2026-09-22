@@ -118,6 +118,12 @@ function PaginaAuth() {
 
       <div className="flex flex-1 items-center justify-center px-5 py-12 sm:px-10">
         <div className="w-full max-w-sm">
+          {modoInicial === null ? (
+            <div className="flex justify-center py-10">
+              <Loader2 className="size-5 animate-spin text-muted-foreground" />
+            </div>
+          ) : (
+            <>
           <div className="mb-8">
             <div className="mb-5 flex size-10 items-center justify-center rounded-xl bg-primary">
               <Lock className="size-4 text-primary-foreground" />
@@ -133,6 +139,7 @@ function PaginaAuth() {
           </div>
 
           <form onSubmit={modoInicial ? configurar : entrar} className="space-y-4">
+
             {modoInicial && (
               <div className="space-y-1.5">
                 <Label htmlFor="nome">Nome completo</Label>
