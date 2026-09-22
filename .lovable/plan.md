@@ -1,30 +1,32 @@
-# Dashboard inicial de monitoramento
+# Catálogo, fornecedores e ofertas reais
 
 ## Objetivo
-Transformar a visão geral autenticada em um dashboard real, mantendo login, papéis e administração de usuários intactos.
+Completar o núcleo operacional que alimenta o dashboard, preservando autenticação, papéis e identidade visual existentes.
 
-## O que será construído
-- Navegação lateral e barra superior responsivas, no visual roxo/azul já aprovado.
-- Quatro indicadores: melhor preço atual, ofertas disponíveis, fornecedores ativos e última atualização.
-- Destaque das ofertas mais recentes.
-- Comparação em tabela no desktop e lista adaptada no celular, com modelo, capacidade, cor, condição, preço, estoque, fornecedor e data/hora.
-- Estados de carregamento, erro e ausência de dados, sem números fictícios.
-- Área reservada para gráficos futuros, claramente identificada como indisponível até existir histórico.
+## Dados
+- Aproveitar as tabelas atuais `produtos`, `fornecedores` e `ofertas`, sem criar equivalentes duplicados.
+- Evoluir `produtos` para separar modelos e variantes: cada produto representa um modelo; uma nova tabela de variantes guarda capacidade, cor e condição.
+- Evoluir fornecedores com tabelas próprias de contatos e endereços.
+- Fazer ofertas apontarem para uma variante e registrar cada alteração de preço em histórico.
+- Migrar os campos e vínculos atuais de forma aditiva, mantendo os dados já existentes legíveis.
 
-## Dados e acesso
-- Criar somente a estrutura mínima de catálogo necessária: fornecedores, produtos e ofertas.
-- Não criar telas de cadastro desses dados nesta etapa.
-- Admin e Vendedor ativos terão apenas leitura no dashboard, usando as mesmas regras de autenticação existentes.
-- Escritas continuarão bloqueadas para usuários comuns; não haverá segredo no navegador.
-- Sem registros, o dashboard apresentará orientação e valores neutros, sem semear exemplos.
+## Permissões
+- Admin ativo poderá criar e editar produtos, variantes, fornecedores, contatos, endereços e ofertas.
+- Vendedor ativo continuará com acesso somente de leitura ao catálogo e ao dashboard.
+- Todas as escritas serão validadas no servidor e protegidas também pelas políticas do banco; nenhum segredo irá ao navegador.
+
+## Telas e fluxos
+- Adicionar páginas autenticadas de Produtos, Fornecedores e Ofertas à navegação.
+- Fornecer listagem, estados vazio/carregando/erro e formulários mínimos em janelas modais para criar e editar registros.
+- Manter tabelas no desktop e listas adaptadas no celular, no visual roxo/azul atual.
+- Atualizar o dashboard para ler variantes e ofertas reais, sem exemplos artificiais.
 
 ## Detalhes técnicos
-- Leitura por função protegida no servidor, respeitando as regras do banco.
-- Migração com permissões explícitas, proteção por linha e índices de consulta.
-- Componentes pequenos para indicadores, ofertas recentes, comparação e estados vazios.
-- Metadados próprios da página mantidos em português-BR.
+- Alteração de banco somente por migração aditiva, com GRANTs, RLS, índices, validações e gatilho de histórico.
+- Funções protegidas com validação de entrada e checagem server-side de administrador para mutações.
+- O histórico armazenará preço, estoque, disponibilidade e data/hora de cada inclusão ou alteração relevante de oferta.
 
 ## Validação
-- Verificar tipos e compilação.
-- Abrir o dashboard autenticado em desktop e celular.
-- Confirmar estado vazio, responsividade, navegação e ausência de erros no navegador.
+- Conferir tipos e compilação.
+- Testar no preview os fluxos principais de Admin e a restrição de edição para Vendedor.
+- Validar dashboard e páginas novas em desktop e celular, incluindo estados vazios e atualização após cadastro.
