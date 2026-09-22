@@ -175,26 +175,29 @@ export const definirPapelUsuario = createServerFn({ method: "POST" })
   .inputValidator((input: unknown) =>
     z.object({ userId: z.string().uuid(), papel: z.enum(["admin", "vendedor"]) }).parse(input),
   )
-  .handler(async ({ data, context }) => {
+  .handler(async ({ data, context }): Promise<ResultadoOperacao> => {
     const ctx = context as unknown as ContextoAutenticado;
-    await garantirAdmin(ctx);
+    const semPermissao = await checarAdmin(ctx);
+    if (semPermissao) return { ok: false, erro: semPermissao };
 
     if (data.userId === ctx.userId && data.papel !== "admin") {
-      throw new Error("Você não pode remover o próprio acesso de administrador.");
+      return { ok: false, erro: "Você não pode remover o próprio acesso de administrador." };
     }
 
     const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
 
+    // Insere o novo papel primeiro: se a remoção falhar, o usuário nunca fica sem acesso.
+    const { error: erroInserir } = await supabaseAdmin
+      .from("user_roles")
+      .upsert({ user_id: data.userId, role: data.papel }, { onConflict: "user_id,role" });
+    if (erroInserir) return { ok: false, erro: "Não foi possível atribuir o novo papel." };
+
     const { error: erroRemover } = await supabaseAdmin
       .from("user_roles")
       .delete()
-      .eq("user_id", data.userId);
-    if (erroRemover) throw new Error("Não foi possível atualizar o papel.");
-
-    const { error } = await supabaseAdmin
-      .from("user_roles")
-      .insert({ user_id: data.userId, role: data.papel });
-    if (error) throw new Error("Não foi possível atribuir o novo papel.");
+      .eq("user_id", data.userId)
+      .neq("role", data.papel);
+    if (erroRemover) return { ok: false, erro: "Papel atribuído, mas o antigo não foi removido." };
 
     return { ok: true };
   });
