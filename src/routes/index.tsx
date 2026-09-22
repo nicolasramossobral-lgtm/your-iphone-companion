@@ -1,6 +1,7 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { Eye, EyeOff, LockKeyhole, Mail } from "lucide-react";
 import { FormEvent, useState } from "react";
+import { resetPassword, signIn } from "../lib/supabase-auth";
 
 export const Route = createFileRoute("/")({
   component: Login,
@@ -9,9 +10,44 @@ export const Route = createFileRoute("/")({
 function Login() {
   const [showPassword, setShowPassword] = useState(false);
   const [remember, setRemember] = useState(false);
+  const [email, setEmail] = useState("");
+  const [password, setPassword] = useState("");
+  const [status, setStatus] = useState<string | null>(null);
+  const [error, setError] = useState<string | null>(null);
+  const [loading, setLoading] = useState(false);
 
-  function handleSubmit(event: FormEvent<HTMLFormElement>) {
+  async function handleSubmit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
+    setError(null);
+    setStatus(null);
+    setLoading(true);
+    try {
+      await signIn(email.trim(), password);
+      window.location.assign("/painel");
+    } catch (err) {
+      setError(err instanceof Error ? err.message : "Não foi possível entrar.");
+    } finally {
+      setLoading(false);
+    }
+  }
+
+  async function handleForgotPassword() {
+    const normalizedEmail = email.trim();
+    if (!normalizedEmail) {
+      setError("Informe seu e-mail para receber o link de recuperação.");
+      return;
+    }
+    setError(null);
+    setStatus(null);
+    setLoading(true);
+    try {
+      await resetPassword(normalizedEmail);
+      setStatus("Se o e-mail estiver cadastrado, você receberá as instruções de recuperação.");
+    } catch (err) {
+      setError(err instanceof Error ? err.message : "Não foi possível enviar o e-mail de recuperação.");
+    } finally {
+      setLoading(false);
+    }
   }
 
   return (
@@ -69,6 +105,8 @@ function Login() {
                     autoComplete="email"
                     placeholder="seu@email.com"
                     required
+                    value={email}
+                    onChange={(event) => setEmail(event.target.value)}
                     className="h-12 w-full rounded-xl border border-slate-200 bg-white pl-10 pr-4 text-sm outline-none transition placeholder:text-slate-400 focus:border-slate-950 focus:ring-2 focus:ring-slate-950/10"
                   />
                 </div>
@@ -84,6 +122,8 @@ function Login() {
                     autoComplete="current-password"
                     placeholder="Digite sua senha"
                     required
+                    value={password}
+                    onChange={(event) => setPassword(event.target.value)}
                     className="h-12 w-full rounded-xl border border-slate-200 bg-white pl-10 pr-12 text-sm outline-none transition placeholder:text-slate-400 focus:border-slate-950 focus:ring-2 focus:ring-slate-950/10"
                   />
                   <button
@@ -97,6 +137,9 @@ function Login() {
                 </div>
               </label>
 
+              {error && <p role="alert" className="rounded-xl bg-red-50 px-4 py-3 text-sm text-red-700">{error}</p>}
+              {status && <p role="status" className="rounded-xl bg-emerald-50 px-4 py-3 text-sm text-emerald-700">{status}</p>}
+
               <div className="flex items-center justify-between gap-4 text-sm">
                 <label className="flex cursor-pointer items-center gap-2 text-slate-600">
                   <input
@@ -107,13 +150,14 @@ function Login() {
                   />
                   Lembrar de mim
                 </label>
-                <button type="button" className="font-medium text-slate-900 hover:underline">
+                <button type="button" onClick={handleForgotPassword} disabled={loading} className="font-medium text-slate-900 hover:underline disabled:opacity-50">
                   Esqueci minha senha
                 </button>
               </div>
 
               <button
                 type="submit"
+                disabled={loading}
                 className="h-12 w-full rounded-xl bg-slate-950 px-4 text-sm font-semibold text-white shadow-sm transition hover:bg-slate-800 focus:outline-none focus:ring-2 focus:ring-slate-950 focus:ring-offset-2"
               >
                 Entrar
