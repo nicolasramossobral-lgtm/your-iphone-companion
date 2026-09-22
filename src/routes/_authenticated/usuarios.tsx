@@ -105,13 +105,14 @@ function GestaoUsuarios() {
   return (
     <div>
       <header className="border-b border-border pb-6">
-        <h1 className="text-2xl font-semibold tracking-tight text-foreground">Usuários</h1>
+        <p className="mb-2 text-xs font-medium text-primary">ADMINISTRAÇÃO</p>
+        <h1 className="text-3xl font-semibold text-foreground">Usuários</h1>
         <p className="mt-1.5 text-sm text-muted-foreground">
           Crie contas internas, defina papéis e controle quem pode acessar o painel.
         </p>
       </header>
 
-      <section className="mt-6 rounded-xl border border-border bg-card p-5">
+      <section className="glass-panel mt-6 rounded-xl p-5">
         <div className="flex items-center gap-2">
           <UserPlus className="size-4 text-muted-foreground" />
           <h2 className="text-sm font-semibold text-card-foreground">Novo usuário</h2>
@@ -145,7 +146,7 @@ function GestaoUsuarios() {
               type="password"
               value={senha}
               onChange={(e) => setSenha(e.target.value)}
-              minLength={8}
+              minLength={10}
               required
             />
           </div>
@@ -170,7 +171,7 @@ function GestaoUsuarios() {
         </form>
       </section>
 
-      <section className="mt-6 overflow-hidden rounded-xl border border-border bg-card">
+      <section className="glass-panel mt-6 overflow-hidden rounded-xl">
         <div className="border-b border-border px-5 py-4">
           <h2 className="text-sm font-semibold text-card-foreground">Equipe</h2>
         </div>

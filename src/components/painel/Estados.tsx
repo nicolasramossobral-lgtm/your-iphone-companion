@@ -6,7 +6,7 @@ import { supabase } from "@/integrations/supabase/client";
 
 export function CarregandoPainel() {
   return (
-    <div className="flex min-h-screen items-center justify-center bg-background">
+    <div className="ambient-gradient flex min-h-screen items-center justify-center bg-background">
       <Loader2 className="size-5 animate-spin text-muted-foreground" />
     </div>
   );
@@ -21,9 +21,9 @@ export function AcessoDesativado() {
   }
 
   return (
-    <div className="flex min-h-screen items-center justify-center bg-background px-5">
-      <div className="max-w-sm text-center">
-        <h1 className="text-lg font-semibold tracking-tight text-foreground">Acesso desativado</h1>
+    <div className="ambient-gradient flex min-h-screen items-center justify-center bg-background px-5">
+      <div className="glass-panel max-w-sm rounded-2xl p-8 text-center">
+        <h1 className="text-lg font-semibold text-foreground">Acesso desativado</h1>
         <p className="mt-2 text-sm leading-relaxed text-muted-foreground">
           Sua conta está sem papel atribuído ou foi desativada. Fale com um administrador.
         </p>
@@ -37,7 +37,7 @@ export function AcessoDesativado() {
 
 export function SemPermissao() {
   return (
-    <div className="rounded-xl border border-border bg-card p-8 text-center">
+    <div className="glass-panel rounded-xl p-8 text-center">
       <h1 className="text-base font-semibold text-card-foreground">Área restrita</h1>
       <p className="mx-auto mt-2 max-w-sm text-sm leading-relaxed text-muted-foreground">
         Somente administradores podem gerenciar usuários e permissões.

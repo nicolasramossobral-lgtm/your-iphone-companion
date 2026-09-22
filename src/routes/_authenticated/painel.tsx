@@ -45,8 +45,9 @@ function Painel() {
 
   return (
     <PainelLayout sessao={sessao}>
-      <header className="border-b border-border pb-6">
-        <h1 className="text-2xl font-semibold tracking-tight text-foreground">
+      <header className="border-b border-border pb-7">
+        <p className="mb-2 text-xs font-medium text-primary">VISÃO GERAL</p>
+        <h1 className="text-3xl font-semibold text-foreground">
           Olá, {sessao.nome.split(" ")[0] || "bem-vindo"}
         </h1>
         <p className="mt-1.5 text-sm text-muted-foreground">
@@ -60,9 +61,11 @@ function Painel() {
           return (
             <article
               key={item.titulo}
-              className="rounded-xl border border-border bg-card p-5 transition-colors hover:border-foreground/20"
+               className="glass-panel group rounded-xl p-5 transition-all duration-300 hover:-translate-y-1 hover:border-primary/35"
             >
-              <Icone className="size-5 text-muted-foreground" />
+               <div className="brand-gradient flex size-9 items-center justify-center rounded-lg shadow-sm">
+                 <Icone className="size-4 text-primary-foreground" />
+               </div>
               <h2 className="mt-4 text-sm font-semibold text-card-foreground">{item.titulo}</h2>
               <p className="mt-1.5 text-sm leading-relaxed text-muted-foreground">
                 {item.descricao}
@@ -72,9 +75,9 @@ function Painel() {
         })}
       </section>
 
-      <section className="mt-6 rounded-xl border border-border bg-secondary/40 p-5">
+      <section className="glass-panel mt-6 rounded-xl p-5">
         <div className="flex items-start gap-3">
-          <ShieldCheck className="mt-0.5 size-5 text-muted-foreground" />
+          <ShieldCheck className="mt-0.5 size-5 text-primary" />
           <div>
             <h2 className="text-sm font-semibold text-foreground">Seu nível de acesso</h2>
             <p className="mt-1.5 text-sm leading-relaxed text-muted-foreground">
