@@ -29,9 +29,23 @@ async function request<T>(table: string, options: RequestInit = {}, query = ""):
 export type Product = { id: string; model: string; brand: string; active: boolean };
 export type Variant = { id: string; product_id: string; storage_gb: number; color: string; condition: string; sku: string | null };
 export type Supplier = { id: string; name: string; legal_name: string | null; notes: string | null; active: boolean };
+export type SignupRequest = { id: string; auth_user_id: string | null; email: string; full_name: string | null; status: string; created_at: string; reviewed_at: string | null; reviewed_by: string | null };
 export type Offer = { id: string; supplier_id: string; product_variant_id: string; price: number; stock_quantity: number | null; observed_at: string; active: boolean };
 
 export const dataApi = {
+signupRequests: async () => {
+    const session = getStoredSession();
+    if (!session) throw new Error("Sessão expirada.");
+    const response = await fetch(`${SUPABASE_URL}/functions/v1/access-admin?action=list`, {
+      headers: { apikey: SUPABASE_ANON_KEY, Authorization: `Bearer ${session.access_token}` },
+    });
+    const payload = await response.json().catch(() => ({})) as { requests?: SignupRequest[]; error?: string };
+    if (!response.ok) throw new Error(payload.error ?? "Não foi possível carregar as solicitações.");
+    return payload.requests ?? [];
+  },
+  approveSignup: async (requestId: string) => adminSignupAction("approve", requestId),
+  rejectSignup: async (requestId: string) => adminSignupAction("reject", requestId),
+
   products: () => request<Product[]>("products", {}, "?select=*&order=model"),
   variants: () => request<Variant[]>("product_variants", {}, "?select=*&order=storage_gb"),
   suppliers: () => request<Supplier[]>("suppliers", {}, "?select=*&order=name"),
@@ -50,3 +64,17 @@ export const dataApi = {
   updateSupplier: (id: string, data: Partial<Supplier>) => request<null>("suppliers", { method: "PATCH", body: JSON.stringify(data) }, `?id=eq.${id}`),
   updateOffer: (id: string, data: Partial<Offer>) => request<null>("supplier_prices", { method: "PATCH", body: JSON.stringify(data) }, `?id=eq.${id}`),
 };
+
+export type SignupRequest = { id: string; auth_user_id: string | null; email: string; full_name: string | null; status: string; created_at: string; reviewed_at: string | null; reviewed_by: string | null };
+
+async function adminSignupAction(action: "approve" | "reject", requestId: string) {
+  const session = getStoredSession();
+  if (!session) throw new Error("Sessão expirada.");
+  const response = await fetch(`${SUPABASE_URL}/functions/v1/access-admin`, {
+    method: "POST",
+    headers: { apikey: SUPABASE_ANON_KEY, Authorization: `Bearer ${session.access_token}`, "Content-Type": "application/json" },
+    body: JSON.stringify({ action, requestId }),
+  });
+  const payload = await response.json().catch(() => ({})) as { error?: string };
+  if (!response.ok) throw new Error(payload.error ?? "Não foi possível atualizar a solicitação.");
+}
