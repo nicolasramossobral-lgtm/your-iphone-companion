@@ -50,6 +50,16 @@ async function garantirAdmin(context: ContextoAutenticado) {
   if (!data) throw new Error("Acesso restrito a administradores ativos.");
 }
 
+/** Valida admin sem lançar, para operações que devolvem resultado. */
+async function checarAdmin(context: ContextoAutenticado): Promise<string | null> {
+  const { data, error } = await context.supabase.rpc("is_active_admin", {
+    _user_id: context.userId,
+  });
+  if (error) return "Não foi possível validar suas permissões.";
+  if (!data) return "Acesso restrito a administradores ativos.";
+  return null;
+}
+
 export const listarUsuarios = createServerFn({ method: "GET" })
   .middleware([requireSupabaseAuth])
   .handler(async ({ context }): Promise<UsuarioInterno[]> => {
