@@ -1,6 +1,6 @@
-export const SUPABASE_URL = "https://flvlopkobywrnttkeedj.supabase.co";
-export const SUPABASE_ANON_KEY = "sb_publishable_mWdQ54O_V2N2yiiURAIMvMg_671m1Ieo";
-const SUPABASE_LEGACY_ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImZsdmxvcGtvYnl3cm50dGtlZWRqIiwicm9sZSI6ImFub24iLCJpYXQiOjE3OTAwNDUxMzcsImV4cCI6MjEwNTYyMTEzN30.u6jL4eQyXzIXs50attLm9Eu7L48nyZqAHlA2PA0_5wU";
+import { supabase, SUPABASE_ANON_KEY, SUPABASE_URL } from "./supabase-client";
+
+export { SUPABASE_ANON_KEY, SUPABASE_URL };
 
 export type AuthSession = {
   access_token: string;
@@ -19,50 +19,19 @@ function assertConfig() {
   }
 }
 
-async function requestBootstrapAdmin(email: string, password: string) {
-  const endpoint = `${SUPABASE_URL}/functions/v1/bootstrap-admin`;
-  const body = JSON.stringify({
-    nome: "Nicolas Ramos",
-    email: email.trim().toLowerCase(),
-    senha: password,
-  });
-
-  let response = await fetch(endpoint, {
-    method: "POST",
-    headers: {
-      apikey: SUPABASE_LEGACY_ANON_KEY,
-      Authorization: `Bearer ${SUPABASE_LEGACY_ANON_KEY}`,
-      "Content-Type": "application/json",
-    },
-    body,
-  });
-
-  if (response.status === 401) {
-    response = await fetch(endpoint, {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body,
-    });
+function authErrorMessage(code?: string, message?: string) {
+  switch (code) {
+    case "invalid_credentials":
+      return "E-mail ou senha inválidos.";
+    case "email_not_confirmed":
+      return "Este e-mail ainda não foi confirmado.";
+    case "too_many_requests":
+      return "Muitas tentativas de login. Aguarde alguns instantes e tente novamente.";
+    case "user_banned":
+      return "Esta conta está temporariamente bloqueada.";
+    default:
+      return message || "Não foi possível entrar.";
   }
-
-  return response;
-}
-
-async function getBootstrapError(response: Response) {
-  const raw = await response.text();
-  let payload: { ok?: boolean; erro?: string } = {};
-  try {
-    payload = JSON.parse(raw) as { ok?: boolean; erro?: string };
-  } catch {
-    // A resposta pode ser texto/HTML quando a requisição é bloqueada antes de chegar à função.
-  }
-
-  const errorCode = response.headers.get("sb-error-code");
-  const details = payload.erro ?? raw.trim();
-
-  return details
-    ? `Inicialização do administrador falhou (HTTP ${response.status}): ${details}`
-    : `Inicialização do administrador falhou (HTTP ${response.status}${errorCode ? `, ${errorCode}` : ""}).`;
 }
 
 export async function signUp(
@@ -116,46 +85,39 @@ export async function signUp(
   return payload.session ?? null;
 }
 
-export async function bootstrapFirstAdmin(email: string, password: string) {
-  assertConfig();
-  const response = await requestBootstrapAdmin(email, password);
-  if (!response.ok) {
-    throw new Error(await getBootstrapError(response));
-  }
-
-  const payload = await response.json().catch(() => ({})) as { ok?: boolean; erro?: string };
-  if (payload.ok === false) {
-    throw new Error(payload.erro ?? "Não foi possível inicializar o administrador.");
-  }
-}
-
 export async function signIn(email: string, password: string): Promise<AuthSession> {
   assertConfig();
-  const normalizedEmail = email.trim().toLowerCase();
 
-  if (normalizedEmail === "nicolasramossobral@gmail.com") {
-    const bootstrapResponse = await requestBootstrapAdmin(normalizedEmail, password);
+  const { data, error } = await supabase.auth.signInWithPassword({
+    email: email.trim().toLowerCase(),
+    password,
+  });
 
-    if (!bootstrapResponse.ok && bootstrapResponse.status !== 409) {
-      throw new Error(await getBootstrapError(bootstrapResponse));
-    }
+  if (error) {
+    const diagnosticCode = error.code ?? error.name ?? "unknown_auth_error";
+    console.warn("[auth] sign-in failed", {
+      status: error.status,
+      code: diagnosticCode,
+    });
+    throw new Error(authErrorMessage(error.code, error.message));
   }
 
-  const response = await fetch(`${SUPABASE_URL}/auth/v1/token?grant_type=password`, {
-    method: "POST",
-    headers: { apikey: SUPABASE_ANON_KEY, "Content-Type": "application/json" },
-    body: JSON.stringify({ email: normalizedEmail, password }),
-  });
-  const payload = (await response.json()) as AuthSession & {
-    error_description?: string;
-    msg?: string;
+  if (!data.session || !data.user) {
+    throw new Error("O Supabase não retornou uma sessão válida.");
+  }
+
+  const session: AuthSession = {
+    access_token: data.session.access_token,
+    refresh_token: data.session.refresh_token,
+    expires_in: data.session.expires_in,
+    expires_at: data.session.expires_at,
+    token_type: data.session.token_type,
+    user: {
+      id: data.user.id,
+      email: data.user.email,
+    },
   };
 
-  if (!response.ok) {
-    throw new Error(payload.error_description ?? payload.msg ?? "E-mail ou senha inválidos.");
-  }
-
-  const session = { ...payload, expires_at: Math.floor(Date.now() / 1000) + payload.expires_in };
   localStorage.setItem(SESSION_KEY, JSON.stringify(session));
   return session;
 }
