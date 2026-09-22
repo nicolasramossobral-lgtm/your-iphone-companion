@@ -1,7 +1,4 @@
-import { getStoredSession } from "./supabase-auth";
-
-const SUPABASE_URL = import.meta.env.VITE_SUPABASE_URL as string | undefined;
-const SUPABASE_ANON_KEY = import.meta.env.VITE_SUPABASE_ANON_KEY as string | undefined;
+import { getStoredSession, SUPABASE_ANON_KEY, SUPABASE_URL } from "./supabase-auth";
 
 function config() {
   if (!SUPABASE_URL || !SUPABASE_ANON_KEY) throw new Error("Supabase não está configurado.");
