@@ -82,7 +82,11 @@ function PaginaAuth() {
     e.preventDefault();
     setEnviando(true);
     try {
-      await criarPrimeiroAdmin({ data: { nome, email, senha } });
+      const resultado = await criarPrimeiroAdmin({ data: { nome, email, senha } });
+      if (!resultado.ok) {
+        toast.error(resultado.erro ?? "Não foi possível concluir.");
+        return;
+      }
       toast.success("Administrador criado. Entrando...");
       setModoInicial(false);
       const { error } = await supabase.auth.signInWithPassword({ email, password: senha });
@@ -91,12 +95,13 @@ function PaginaAuth() {
         return;
       }
       navigate({ to: "/painel", replace: true });
-    } catch (erro) {
-      toast.error(erro instanceof Error ? erro.message : "Não foi possível concluir.");
+    } catch {
+      toast.error("Não foi possível concluir. Tente novamente.");
     } finally {
       setEnviando(false);
     }
   }
+
 
   return (
     <div className="flex min-h-screen flex-col bg-background md:flex-row">
