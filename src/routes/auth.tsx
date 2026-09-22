@@ -177,11 +177,18 @@ function PaginaAuth() {
                 type="password"
                 value={senha}
                 onChange={(e) => setSenha(e.target.value)}
-                autoComplete="current-password"
-                minLength={8}
+                autoComplete={modoInicial ? "new-password" : "current-password"}
+                minLength={modoInicial ? 10 : 8}
                 required
               />
+              {modoInicial && (
+                <p className="text-xs text-muted-foreground">
+                  Use ao menos 10 caracteres com letras, números e símbolos. Senhas comuns ou
+                  presentes em vazamentos são recusadas.
+                </p>
+              )}
             </div>
+
 
             <Button type="submit" className="w-full" disabled={enviando || modoInicial === null}>
               {enviando && <Loader2 className="mr-2 size-4 animate-spin" />}
