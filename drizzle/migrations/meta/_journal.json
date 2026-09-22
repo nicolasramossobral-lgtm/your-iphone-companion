@@ -8,6 +8,13 @@
       "when": 1790052540460,
       "tag": "0000_auth_roles_profiles",
       "breakpoints": true
+    },
+    {
+      "idx": 1,
+      "version": "7",
+      "when": 1790052553893,
+      "tag": "0001_remove_auth_trigger",
+      "breakpoints": true
     }
   ]
 }
