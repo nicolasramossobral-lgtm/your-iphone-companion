@@ -152,19 +152,20 @@ export const definirStatusUsuario = createServerFn({ method: "POST" })
   .inputValidator((input: unknown) =>
     z.object({ userId: z.string().uuid(), ativo: z.boolean() }).parse(input),
   )
-  .handler(async ({ data, context }) => {
+  .handler(async ({ data, context }): Promise<ResultadoOperacao> => {
     const ctx = context as unknown as ContextoAutenticado;
-    await garantirAdmin(ctx);
+    const semPermissao = await checarAdmin(ctx);
+    if (semPermissao) return { ok: false, erro: semPermissao };
 
     if (data.userId === ctx.userId && !data.ativo) {
-      throw new Error("Você não pode desativar a própria conta.");
+      return { ok: false, erro: "Você não pode desativar a própria conta." };
     }
 
     const { error } = await ctx.supabase
       .from("profiles")
       .update({ ativo: data.ativo })
       .eq("id", data.userId);
-    if (error) throw new Error("Não foi possível atualizar o status.");
+    if (error) return { ok: false, erro: "Não foi possível atualizar o status." };
 
     return { ok: true };
   });
