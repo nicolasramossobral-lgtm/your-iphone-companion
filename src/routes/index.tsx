@@ -30,7 +30,7 @@ function Login() {
         await bootstrapFirstAdmin(session.access_token);
       }
       const role = await dataApi.role();
-      if (!role) throw new Error("Seu acesso ainda não foi aprovado pelo administrador.");
+      if (!role) { localStorage.removeItem("your-iphone-companion.auth"); throw new Error("Seu acesso ainda não foi aprovado pelo administrador."); }
       window.location.assign("/painel");
     } catch (err) {
       setError(err instanceof Error ? err.message : "Não foi possível entrar.");
