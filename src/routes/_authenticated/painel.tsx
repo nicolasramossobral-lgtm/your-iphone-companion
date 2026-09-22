@@ -108,7 +108,7 @@ function Dashboard({ nome }: { nome: string }) {
   );
 }
 
-function Resumo({ dados, carregando }: { dados?: DashboardData; carregando: boolean }) {
+function Resumo({ dados, carregando }: { dados: DashboardData | undefined; carregando: boolean }) {
   const itens = [
     { titulo: "Melhor preço atual", valor: dados?.melhorPreco != null ? dinheiro.format(dados.melhorPreco) : "—", detalhe: "Entre ofertas disponíveis", icone: Tag },
     { titulo: "Ofertas disponíveis", valor: String(dados?.quantidadeOfertas ?? 0), detalhe: "Itens monitorados", icone: Boxes },
