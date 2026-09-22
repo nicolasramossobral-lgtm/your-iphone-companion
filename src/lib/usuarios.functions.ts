@@ -104,9 +104,11 @@ export const criarUsuario = createServerFn({ method: "POST" })
   .inputValidator((input: unknown) => esquemaCriacao.parse(input))
   .handler(async ({ data, context }): Promise<ResultadoOperacao> => {
     const ctx = context as unknown as ContextoAutenticado;
-    await garantirAdmin(ctx);
+    const semPermissao = await checarAdmin(ctx);
+    if (semPermissao) return { ok: false, erro: semPermissao };
 
     const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
+
 
     const { data: criado, error } = await supabaseAdmin.auth.admin.createUser({
       email: data.email,
