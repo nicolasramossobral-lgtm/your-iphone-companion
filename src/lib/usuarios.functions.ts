@@ -72,7 +72,7 @@ const esquemaCriacao = z.object({
 export const criarUsuario = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
   .inputValidator((input: unknown) => esquemaCriacao.parse(input))
-  .handler(async ({ data, context }) => {
+  .handler(async ({ data, context }): Promise<ResultadoOperacao> => {
     const ctx = context as unknown as ContextoAutenticado;
     await garantirAdmin(ctx);
 
@@ -85,7 +85,7 @@ export const criarUsuario = createServerFn({ method: "POST" })
       user_metadata: { nome: data.nome },
     });
     if (error || !criado.user) {
-      throw new Error(error?.message ?? "Não foi possível criar o usuário.");
+      return { ok: false, erro: traduzirErroSenha(error?.message) };
     }
 
     const novoId = criado.user.id;
@@ -96,15 +96,16 @@ export const criarUsuario = createServerFn({ method: "POST" })
       email: data.email,
       ativo: true,
     });
-    if (erroPerfil) throw new Error("Usuário criado, mas o perfil falhou.");
+    if (erroPerfil) return { ok: false, erro: "Usuário criado, mas o perfil falhou." };
 
     const { error: erroPapel } = await supabaseAdmin
       .from("user_roles")
       .upsert({ user_id: novoId, role: data.papel }, { onConflict: "user_id,role" });
-    if (erroPapel) throw new Error("Usuário criado, mas o papel falhou.");
+    if (erroPapel) return { ok: false, erro: "Usuário criado, mas o papel falhou." };
 
-    return { id: novoId };
+    return { ok: true };
   });
+
 
 export const definirStatusUsuario = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
