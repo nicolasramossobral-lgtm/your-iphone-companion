@@ -113,7 +113,7 @@ function PaginaAuth() {
           </div>
           <p className="text-sm font-semibold text-foreground">Central de Preços</p>
         </div>
-        <div className="max-w-sm">
+        <div className="relative max-w-sm">
           <div className="mb-5 flex w-fit items-center gap-2 rounded-full border border-primary/20 bg-primary/10 px-3 py-1.5 text-xs font-medium text-primary">
             <ShieldCheck className="size-3.5" /> Ambiente seguro
           </div>
