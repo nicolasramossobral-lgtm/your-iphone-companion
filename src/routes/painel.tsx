@@ -376,7 +376,7 @@ function Dashboard() {
                 </button>
               </div>
 
-              <div className="grid gap-3 sm:grid-cols-2 xl:grid-cols-4">
+              <div className="metric-card-group grid gap-3 sm:grid-cols-2 xl:grid-cols-4">
                 <MetricCard
                   title="Melhor preço atual"
                   value={bestOffer ? formatCurrency(bestOffer.price) : "—"}
