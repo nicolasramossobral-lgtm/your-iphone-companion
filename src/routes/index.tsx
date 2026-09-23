@@ -85,7 +85,7 @@ function Login() {
               <Smartphone className="h-7 w-7 text-white" strokeWidth={1.8} />
             </div>
             <div className="leading-tight">
-              <div className="text-lg font-bold tracking-tight">Your iPhone</div>
+              <div className="text-lg font-bold tracking-tight">NG IPhones</div>
               <div className="text-lg font-bold tracking-tight text-violet-400">Companion</div>
             </div>
           </div>
@@ -105,13 +105,13 @@ function Login() {
                 Bem-vindo ao
               </p>
               <h1 className="text-5xl font-bold leading-[0.98] tracking-tight xl:text-6xl">
-                Your iPhone
+                NG IPhones
                 <span className="block bg-gradient-to-r from-violet-500 via-blue-500 to-cyan-400 bg-clip-text text-transparent">
                   Companion
                 </span>
               </h1>
               <p className="mt-7 max-w-md text-lg leading-8 text-blue-100/75">
-                Compare preços, encontre os melhores fornecedores e maximize seus lucros com a iPhone Companion.
+                Compare preços, encontre os melhores fornecedores e maximize seus lucros com a NG IPhones BR.
               </p>
             </div>
 
@@ -247,7 +247,7 @@ function Login() {
         </div>
 
         <footer className="hidden pb-2 text-sm text-blue-200/70 lg:block">
-          © {new Date().getFullYear()} Your iPhone Companion
+          © {new Date().getFullYear()} NG IPhones BR
         </footer>
       </div>
     </main>
