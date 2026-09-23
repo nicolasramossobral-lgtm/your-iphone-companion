@@ -508,3 +508,48 @@ select.app-input {
     transition-duration: 1ms !important;
   }
 }
+
+/* Form-control fixes: keep browser autofill dark and prevent 3D transforms from
+   moving/blurring native fields and absolutely positioned controls. */
+input:-webkit-autofill,
+input:-webkit-autofill:hover,
+input:-webkit-autofill:focus,
+input:-webkit-autofill:active {
+  -webkit-text-fill-color: var(--app-text);
+  -webkit-box-shadow: 0 0 0 1000px var(--app-input) inset;
+  box-shadow: 0 0 0 1000px var(--app-input) inset;
+  caret-color: var(--app-text);
+}
+
+input[type="email"],
+input[type="password"],
+input[type="text"],
+select,
+textarea {
+  transform: none;
+  translate: none;
+  rotate: none;
+  scale: none;
+}
+
+.login-password-toggle {
+  position: absolute !important;
+  right: 0.75rem;
+  top: 50%;
+  z-index: 3;
+  transform: translateY(-50%) !important;
+  translate: none !important;
+  rotate: none !important;
+  scale: none !important;
+  box-shadow: none !important;
+  will-change: auto !important;
+}
+
+.login-password-toggle:hover:not(:disabled),
+.login-password-toggle:active:not(:disabled) {
+  transform: translateY(-50%) !important;
+  translate: none !important;
+  rotate: none !important;
+  scale: none !important;
+  box-shadow: none !important;
+}
