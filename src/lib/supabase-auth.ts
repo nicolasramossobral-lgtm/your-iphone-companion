@@ -82,7 +82,10 @@ export async function signUp(
     }
   }
 
-  if (payload.session) localStorage.removeItem(SESSION_KEY);
+  if (payload.session) {
+    localStorage.removeItem(SESSION_KEY);
+    sessionStorage.removeItem(SESSION_KEY_SESSION);
+  }
   return payload.session ?? null;
 }
 
@@ -126,7 +129,6 @@ export async function signIn(email: string, password: string, remember = true): 
   } else {
     sessionStorage.setItem(SESSION_KEY_SESSION, serialized);
     localStorage.removeItem(SESSION_KEY);
-    sessionStorage.removeItem(SESSION_KEY_SESSION);
   }
   return session;
 }
@@ -139,11 +141,13 @@ export function getStoredSession(): AuthSession | null {
     const session = JSON.parse(raw) as AuthSession;
     if (session.expires_at && session.expires_at <= Math.floor(Date.now() / 1000)) {
       localStorage.removeItem(SESSION_KEY);
+      sessionStorage.removeItem(SESSION_KEY_SESSION);
       return null;
     }
     return session;
   } catch {
     localStorage.removeItem(SESSION_KEY);
+    sessionStorage.removeItem(SESSION_KEY_SESSION);
     return null;
   }
 }
