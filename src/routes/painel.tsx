@@ -60,12 +60,12 @@ function Dashboard() {
   const [suppliers, setSuppliers] = useState<Supplier[]>([]);
   const [offers, setOffers] = useState<Offer[]>([]);
   const [history, setHistory] = useState<PriceHistory[]>([]);
-  const [profile, setProfile] = useState<{ full_name: string | null; email: string | null } | null>(null);
+  const [profile, setProfile] = useState<{ full_name: string | null; email: string | null; phone: string | null } | null>(null);
   const [role, setRole] = useState<string | null>(null);
   const [loading, setLoading] = useState(true);
   const [search, setSearch] = useState("");
   const [mobileNavOpen, setMobileNavOpen] = useState(false);
-  const [modal, setModal] = useState<"product" | "supplier" | "offer" | "edit-product" | "edit-supplier" | "edit-offer" | null>(null);
+  const [modal, setModal] = useState<"product" | "supplier" | "offer" | "edit-product" | "edit-supplier" | "edit-offer" | "profile" | null>(null);
   const [editingProduct, setEditingProduct] = useState<Product | null>(null);
   const [editingSupplier, setEditingSupplier] = useState<Supplier | null>(null);
   const [editingOffer, setEditingOffer] = useState<Offer | null>(null);
@@ -767,6 +767,14 @@ function Modal({ title, onClose, children }: { title: string; onClose: () => voi
   );
 }
 
+
+
+function ProfileModal({ profile, userId, onClose, onSave }: { profile: { full_name: string | null; email: string | null; phone: string | null }; userId: string; onClose: () => void; onSave: (fullName: string, phone: string) => Promise<void> }) {
+  const [name, setName] = useState(profile.full_name ?? "");
+  const [phone, setPhone] = useState(profile.phone ?? "");
+  const [busy, setBusy] = useState(false);
+  return <Modal title="Meu perfil" onClose={onClose}><form className="mt-5 space-y-3.5" onSubmit={async e => { e.preventDefault(); if (!userId) return; setBusy(true); try { await onSave(name.trim(), phone.trim()); } finally { setBusy(false); } }}><Field label="Nome completo" value={name} onChange={setName} required /><Field label="E-mail" value={profile.email ?? ""} onChange={() => {}} /><Field label="Telefone / WhatsApp" value={phone} onChange={setPhone} placeholder="(11) 99999-9999" /><ModalButton busy={busy} label="Salvar perfil" /></form></Modal>;
+}
 
 function EditProductModal({ item, onClose, onSave }: { item: Product; onClose: () => void; onSave: (id: string, model: string, active: boolean) => Promise<void> }) {
   const [model, setModel] = useState(item.model); const [active, setActive] = useState(item.active); const [busy, setBusy] = useState(false);
