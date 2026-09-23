@@ -341,9 +341,9 @@ function Dashboard() {
                 <p className="text-[12px] font-medium text-[var(--app-secondary)]">{profile?.email ?? getStoredSession()?.user.email ?? "—"}</p>
                 <p className="text-[10px] uppercase tracking-[0.12em] text-[var(--app-muted)]">{canManage ? "Administrador" : "Fornecedor"}</p>
               </div>
-              <div className="flex h-8 w-8 items-center justify-center rounded-full border border-[var(--app-border)] bg-[var(--app-surface-2)]">
-                <UserCircle2 className="h-4 w-4 text-[var(--app-muted)]" />
-              </div>
+              <button type="button" aria-label="Abrir meu perfil" onClick={() => setModal("profile")} className="flex h-8 w-8 items-center justify-center rounded-full border border-[var(--app-border)] bg-[var(--app-surface-2)] text-[var(--app-muted)] transition hover:border-violet-400/30 hover:bg-violet-500/10 hover:text-white">
+                <UserCircle2 className="h-4 w-4" />
+              </button>
             </div>
           </div>
         </header>
@@ -491,7 +491,10 @@ function Dashboard() {
                       <p className="truncate text-[13px] font-medium text-[var(--app-text)]">{product.model}</p>
                       <p className="mt-1 text-[11px] text-[var(--app-muted)]">{variants.filter((variant) => variant.product_id === product.id).length} variante(s) · {product.brand}</p>
                     </div>
-                    <span className={statusPill(product.active)}>{product.active ? "Ativo" : "Inativo"}</span>
+                    <div className="flex items-center gap-2">
+                      <span className={statusPill(product.active)}>{product.active ? "Ativo" : "Inativo"}</span>
+                      {canManage && <button type="button" onClick={() => { setEditingProduct(product); setModal("edit-product"); }} className="rounded-md border border-[var(--app-border)] px-2.5 py-1.5 text-[10px] font-medium text-[var(--app-secondary)] transition hover:bg-white/5 hover:text-white">Editar</button>}
+                    </div>
                   </div>
                 ))}
                 {!filteredProducts.length && <EmptyState icon={Package} title="Nenhum produto encontrado" description="Ajuste a busca ou cadastre um novo produto." />}
@@ -517,7 +520,10 @@ function Dashboard() {
                       <p className="truncate text-[13px] font-medium text-[var(--app-text)]">{supplier.name}</p>
                       <p className="mt-1 truncate text-[11px] text-[var(--app-muted)]">{supplier.legal_name || "Razão social não informada"}</p>
                     </div>
-                    <span className={statusPill(supplier.active)}>{supplier.active ? "Ativo" : "Inativo"}</span>
+                    <div className="flex items-center gap-2">
+                      <span className={statusPill(supplier.active)}>{supplier.active ? "Ativo" : "Inativo"}</span>
+                      {canManage && <button type="button" onClick={() => { setEditingSupplier(supplier); setModal("edit-supplier"); }} className="rounded-md border border-[var(--app-border)] px-2.5 py-1.5 text-[10px] font-medium text-[var(--app-secondary)] transition hover:bg-white/5 hover:text-white">Editar</button>}
+                    </div>
                   </div>
                 ))}
                 {!filteredSuppliers.length && <EmptyState icon={Truck} title="Nenhum fornecedor encontrado" description="Ajuste a busca ou cadastre um novo fornecedor." />}
@@ -621,9 +627,20 @@ function Dashboard() {
         </section>
       </div>
 
+      {modal === "profile" && profile && <ProfileModal profile={profile} userId={getStoredSession()?.user.id ?? ""} onClose={() => setModal(null)} onSave={async (fullName, phone) => {
+        const userId = getStoredSession()?.user.id;
+        if (!userId) throw new Error("Sessão expirada.");
+        await dataApi.updateProfile(userId, { full_name: fullName, phone: phone || null });
+        setModal(null);
+        setNotice("Perfil atualizado.");
+        await load();
+      }} />}
       {modal === "product" && <ProductModal onClose={() => setModal(null)} onSave={saveProduct} />}
+      {modal === "edit-product" && editingProduct && <EditProductModal item={editingProduct} onClose={() => { setModal(null); setEditingProduct(null); }} onSave={saveProductEdit} />}
       {modal === "supplier" && <SupplierModal onClose={() => setModal(null)} onSave={saveSupplier} />}
+      {modal === "edit-supplier" && editingSupplier && <EditSupplierModal item={editingSupplier} onClose={() => { setModal(null); setEditingSupplier(null); }} onSave={saveSupplierEdit} />}
       {modal === "offer" && <OfferModal variants={variants} products={products} suppliers={suppliers} onClose={() => setModal(null)} onSave={saveOffer} />}
+      {modal === "edit-offer" && editingOffer && <EditOfferModal item={editingOffer} variants={variants} products={products} suppliers={suppliers} onClose={() => { setModal(null); setEditingOffer(null); }} onSave={saveOfferEdit} />}
     </main>
   );
 }
