@@ -8,7 +8,7 @@ export const Route = createFileRoute("/")({
   component: Login,
 });
 
-function Login() {\nfunction Field({ label, value, onChange }: { label: string; value: string; onChange: (value: string) => void }) {\n  return <label className="block"><span className="mb-2 block text-sm font-medium text-blue-100">{label}</span><input required minLength={6} type="password" value={value} onChange={(event) => onChange(event.target.value)} className="h-14 w-full rounded-2xl border border-indigo-500/45 bg-indigo-950/45 px-4 text-white outline-none transition focus:border-cyan-400 focus:ring-2 focus:ring-cyan-400/15" /></label>;\n}\n
+function Login() {
   const [mode, setMode] = useState<"login" | "signup">("login");
   const [showPassword, setShowPassword] = useState(false);
   const [remember, setRemember] = useState(false);

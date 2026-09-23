@@ -114,11 +114,11 @@ export async function signIn(email: string, password: string, remember = true): 
     access_token: data.session.access_token,
     refresh_token: data.session.refresh_token,
     expires_in: data.session.expires_in,
-    expires_at: data.session.expires_at,
+    ...(data.session.expires_at ? { expires_at: data.session.expires_at } : {}),
     token_type: data.session.token_type,
     user: {
       id: data.user.id,
-      email: data.user.email,
+      ...(data.user.email ? { email: data.user.email } : {}),
     },
   };
 
