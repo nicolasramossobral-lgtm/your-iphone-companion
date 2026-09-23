@@ -240,7 +240,7 @@ function Dashboard() {
           </div>
           <div className="min-w-0">
             <p className="text-[10px] font-semibold uppercase tracking-[0.18em] text-[var(--app-purple)]">Painel interno</p>
-            <p className="truncate text-sm font-semibold text-[var(--app-text)]">Your iPhone Companion</p>
+            <p className="truncate text-sm font-semibold text-[var(--app-text)]">NG IPhones BR</p>
           </div>
           <button onClick={() => setMobileNavOpen(false)} className="ml-auto rounded-md p-1 text-[var(--app-muted)] hover:bg-white/5 lg:hidden">
             <ChevronLeft className="h-4 w-4" />
