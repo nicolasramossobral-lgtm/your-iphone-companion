@@ -31,7 +31,7 @@ export type Variant = { id: string; product_id: string; storage_gb: number; colo
 export type Supplier = { id: string; name: string; legal_name: string | null; notes: string | null; active: boolean };
 export type SignupRequest = { id: string; auth_user_id: string | null; email: string; full_name: string | null; status: string; created_at: string; reviewed_at: string | null; reviewed_by: string | null };
 export type Offer = { id: string; supplier_id: string; product_variant_id: string; price: number; stock_quantity: number | null; observed_at: string; active: boolean };
-export type PriceHistory = { id: string; supplier_price_id: string | null; supplier_id: string; product_variant_id: string; price: number; stock_quantity: number | null; observed_at: string; source_message_id: string | null; created_at: string };
+export type PriceHistory = { id: string; supplier_price_id: string | null; supplier_id: string; product_variant_id: string; price: number; stock_quantity: number | null; observed_at: string; source_message_id: string | null; created_at: string };\nexport type WhatsAppMessage = { id: string; supplier_id: string | null; external_message_id: string | null; chat_id: string | null; sender_name: string | null; sender_phone: string | null; message_text: string; received_at: string; raw_payload: Record<string, unknown> | null; created_at: string; processing_status: "pending" | "processed" | "failed" | "ignored" | null; parser_version: string | null };
 
 export const dataApi = {
 signupRequests: async () => {
@@ -52,6 +52,18 @@ signupRequests: async () => {
   suppliers: () => request<Supplier[]>("suppliers", {}, "?select=*&order=name"),
   offers: () => request<Offer[]>("supplier_prices", {}, "?select=*&order=price"),
   priceHistory: () => request<PriceHistory[]>("price_history", {}, "?select=*&order=observed_at.desc&limit=100"),
+  whatsappMessages: async () => {
+    const [messages, processing] = await Promise.all([
+      request<Array<Omit<WhatsAppMessage, "processing_status" | "parser_version">>>("whatsapp_messages", {}, "?select=*&order=received_at.desc&limit=100"),
+      request<Array<{ message_id: string; status: WhatsAppMessage["processing_status"]; parser_version: string | null }>>("message_processing", {}, "?select=message_id,status,parser_version&order=updated_at.desc&limit=100"),
+    ]);
+    const statusByMessage = new Map(processing.map((item) => [item.message_id, item]));
+    return messages.map((message) => ({
+      ...message,
+      processing_status: statusByMessage.get(message.id)?.status ?? null,
+      parser_version: statusByMessage.get(message.id)?.parser_version ?? null,
+    }));
+  },
   profile: async () => {
     const session = getStoredSession();
     if (!session) return null;
