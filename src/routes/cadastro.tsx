@@ -29,7 +29,7 @@ function Cadastro() {
     <main className="relative min-h-screen overflow-hidden bg-[var(--app-bg)] px-5 py-10 text-[var(--app-text)]">
       <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(circle_at_0%_0%,rgba(139,92,246,0.09),transparent_30%),radial-gradient(circle_at_100%_100%,rgba(59,130,246,0.07),transparent_30%)]" />
       <div className="relative">
-      <div className="mx-auto max-w-lg rounded-xl border border-[var(--app-border)] bg-[var(--app-surface)] p-6 shadow-[0_8px_28px_rgba(0,0,0,0.16)] sm:p-8">
+      <div className="ui-3d-surface mx-auto max-w-lg rounded-xl border border-[var(--app-border)] bg-[var(--app-surface)] p-6 shadow-[0_8px_28px_rgba(0,0,0,0.16)] sm:p-8">
         <a href="/" className="mb-8 inline-flex items-center gap-2 text-sm text-[var(--app-secondary)] hover:text-white"><ArrowLeft className="h-4 w-4" /> Voltar para o login</a>
         <div className="mb-8 text-center">
           <div className="mx-auto mb-4 flex h-14 w-14 items-center justify-center rounded-2xl border border-violet-400/30 bg-indigo-500/10"><UserPlus className="h-7 w-7" /></div>
