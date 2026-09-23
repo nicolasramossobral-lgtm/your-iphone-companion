@@ -723,7 +723,7 @@ function Modal({ title, onClose, children }: { title: string; onClose: () => voi
   return (
     <div className="fixed inset-0 z-[70] flex items-center justify-center bg-black/70 p-4 backdrop-blur-sm">
       <button aria-label="Fechar" className="absolute inset-0 cursor-default" onClick={onClose} />
-      <div className="relative z-10 w-full max-w-lg rounded-xl border border-[var(--app-border)] bg-[var(--app-surface)] p-5 shadow-2xl">
+      <div className="ui-3d-surface relative z-10 w-full max-w-lg rounded-xl border border-[var(--app-border)] bg-[var(--app-surface)] p-5 shadow-2xl">
         <div className="flex items-center justify-between">
           <h2 className="text-[15px] font-semibold">{title}</h2>
           <button onClick={onClose} className="rounded-md p-1.5 text-[var(--app-muted)] hover:bg-white/5 hover:text-white"><X className="h-4 w-4" /></button>
