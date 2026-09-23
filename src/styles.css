@@ -337,17 +337,45 @@ select.app-input {
     .panel-card,
     .metric-card,
     .app-input,
-    .brand-mark,
-    .icon-surface
+    .brand-mark
   ):hover:not(:disabled) {
     translate: 0 -3px;
-    rotate: 1 0.75 0 1.25deg;
-    scale: 1.012;
+    rotate: none;
+    scale: 1.008;
     z-index: 2;
     box-shadow:
       0 16px 34px rgba(0, 0, 0, 0.26),
       0 4px 12px rgba(99, 102, 241, 0.14),
       inset 0 1px 0 rgba(255, 255, 255, 0.07);
+  }
+
+  /* Keep small icon containers optically sharp instead of rotating their SVGs. */
+  .icon-surface:hover:not(:disabled) {
+    translate: none;
+    rotate: none;
+    scale: 1.02;
+    z-index: 2;
+    box-shadow:
+      0 8px 18px rgba(0, 0, 0, 0.20),
+      inset 0 1px 0 rgba(255, 255, 255, 0.06);
+  }
+
+  /* Focus the card under the pointer and soften the surrounding choices. */
+  .metric-card-group:hover .metric-card:not(:hover) {
+    filter: blur(3px);
+    opacity: 0.38;
+    scale: 0.985;
+  }
+
+  .metric-card-group:hover .metric-card:hover {
+    filter: none;
+    opacity: 1;
+    translate: 0 -5px;
+    scale: 1.018;
+    box-shadow:
+      0 22px 44px rgba(0, 0, 0, 0.32),
+      0 8px 22px rgba(99, 102, 241, 0.18),
+      inset 0 1px 0 rgba(255, 255, 255, 0.08);
   }
 
   :where(
@@ -423,8 +451,8 @@ select.app-input {
 
   input[type="checkbox"]:hover,
   input[type="radio"]:hover {
-    scale: 1.12;
-    rotate: 1 0.8 0 6deg;
+    scale: 1.08;
+    rotate: none;
     filter: drop-shadow(0 5px 8px rgba(99, 102, 241, 0.25));
   }
 
@@ -519,6 +547,18 @@ input:-webkit-autofill:active {
   -webkit-box-shadow: 0 0 0 1000px var(--app-input) inset;
   box-shadow: 0 0 0 1000px var(--app-input) inset;
   caret-color: var(--app-text);
+}
+
+/* Chrome-native autofill/credential controls stay bright on the dark login surface. */
+input[type="email"],
+input[type="password"] {
+  color-scheme: dark;
+}
+
+input::-webkit-credentials-auto-fill-button,
+input::-webkit-contacts-auto-fill-button {
+  filter: brightness(0) invert(1);
+  opacity: 1;
 }
 
 input[type="email"],
