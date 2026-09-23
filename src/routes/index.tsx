@@ -1,14 +1,14 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { ArrowRight, Eye, EyeOff, LockKeyhole, Mail, Smartphone, UserPlus } from "lucide-react";
-import { FormEvent, useState } from "react";
+import { FormEvent, useEffect, useState } from "react";
 import { dataApi } from "../lib/supabase-data";
-import { resetPassword, signIn, signUp } from "../lib/supabase-auth";
+import { recoverSessionFromUrl, resetPassword, signIn, signUp, updatePassword } from "../lib/supabase-auth";
 
 export const Route = createFileRoute("/")({
   component: Login,
 });
 
-function Login() {
+function Login() {\nfunction Field({ label, value, onChange }: { label: string; value: string; onChange: (value: string) => void }) {\n  return <label className="block"><span className="mb-2 block text-sm font-medium text-blue-100">{label}</span><input required minLength={6} type="password" value={value} onChange={(event) => onChange(event.target.value)} className="h-14 w-full rounded-2xl border border-indigo-500/45 bg-indigo-950/45 px-4 text-white outline-none transition focus:border-cyan-400 focus:ring-2 focus:ring-cyan-400/15" /></label>;\n}\n
   const [mode, setMode] = useState<"login" | "signup">("login");
   const [showPassword, setShowPassword] = useState(false);
   const [remember, setRemember] = useState(false);
@@ -18,6 +18,13 @@ function Login() {
   const [status, setStatus] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
+  const [recoveryMode, setRecoveryMode] = useState(false);
+  const [newPassword, setNewPassword] = useState("");
+  const [confirmPassword, setConfirmPassword] = useState("");
+
+  useEffect(() => {
+    void recoverSessionFromUrl().then((recovered) => setRecoveryMode(recovered)).catch((err) => setError(err instanceof Error ? err.message : "Link de recuperação inválido."));
+  }, []);
 
   async function handleSubmit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
@@ -25,9 +32,9 @@ function Login() {
     setStatus(null);
     setLoading(true);
     try {
-      const session = await signIn(email.trim(), password);
+      const session = await signIn(email.trim(), password, remember);
       const role = await dataApi.role();
-      if (!role) { localStorage.removeItem("your-iphone-companion.auth"); throw new Error("Seu acesso ainda não foi aprovado pelo administrador."); }
+      if (!role) { localStorage.removeItem("your-iphone-companion.auth"); sessionStorage.removeItem("your-iphone-companion.session"); throw new Error("Seu acesso ainda não foi aprovado pelo administrador."); }
       window.location.assign("/painel");
     } catch (err) {
       setError(err instanceof Error ? err.message : "Não foi possível entrar.");
