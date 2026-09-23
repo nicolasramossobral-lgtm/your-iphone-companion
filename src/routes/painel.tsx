@@ -701,6 +701,7 @@ function Dashboard() {
                 </section>
               </div>
             </section>
+          )}
         </section>
       </div>
 
