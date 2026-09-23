@@ -77,10 +77,10 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
     meta: [
       { charSet: "utf-8" },
       { name: "viewport", content: "width=device-width, initial-scale=1" },
-      { title: "Your iPhone Companion" },
+      { title: "NG IPhones BR" },
       { name: "description", content: "Gestão de produtos, fornecedores e ofertas de iPhone." },
-      { name: "author", content: "Your iPhone Companion" },
-      { property: "og:title", content: "Your iPhone Companion" },
+      { name: "author", content: "NG IPhones BR" },
+      { property: "og:title", content: "NG IPhones BR" },
       { property: "og:description", content: "Gestão de produtos, fornecedores e ofertas de iPhone." },
       { property: "og:type", content: "website" },
       { name: "twitter:card", content: "summary_large_image" },
