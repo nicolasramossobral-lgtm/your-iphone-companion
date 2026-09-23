@@ -204,7 +204,7 @@ function Login() {
                         type="button"
                         aria-label={showPassword ? "Ocultar senha" : "Mostrar senha"}
                         onClick={() => setShowPassword((value) => !value)}
-                        className="absolute right-3 top-1/2 -translate-y-1/2 rounded-lg p-2 text-blue-300 transition hover:bg-white/10 hover:text-white"
+                        className="login-password-toggle rounded-lg p-2 text-blue-300 transition hover:bg-white/10 hover:text-white"
                       >
                         {showPassword ? <EyeOff className="h-5 w-5" /> : <Eye className="h-5 w-5" />}
                       </button>
