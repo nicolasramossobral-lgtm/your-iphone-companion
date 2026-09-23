@@ -65,10 +65,12 @@ function Dashboard() {
   const [loading, setLoading] = useState(true);
   const [search, setSearch] = useState("");
   const [mobileNavOpen, setMobileNavOpen] = useState(false);
-  const [modal, setModal] = useState<"product" | "supplier" | "offer" | "edit-product" | "edit-supplier" | "edit-offer" | "profile" | null>(null);
+  const [modal, setModal] = useState<"product" | "supplier" | "offer" | "variants" | "variant" | "edit-product" | "edit-supplier" | "edit-offer" | "edit-variant" | "profile" | null>(null);
   const [editingProduct, setEditingProduct] = useState<Product | null>(null);
   const [editingSupplier, setEditingSupplier] = useState<Supplier | null>(null);
   const [editingOffer, setEditingOffer] = useState<Offer | null>(null);
+  const [selectedProduct, setSelectedProduct] = useState<Product | null>(null);
+  const [editingVariant, setEditingVariant] = useState<Variant | null>(null);
   const [notice, setNotice] = useState<string | null>(null);
 
   async function load() {
@@ -179,6 +181,31 @@ function Dashboard() {
     [suppliers, search],
   );
 
+  const comparisonRows = useMemo(() => {
+    const grouped = new Map<string, Offer[]>();
+    activeOffers.forEach((offer) => {
+      const current = grouped.get(offer.product_variant_id) ?? [];
+      current.push(offer);
+      grouped.set(offer.product_variant_id, current);
+    });
+
+    return [...grouped.entries()]
+      .map(([variantId, rows]) => {
+        const sorted = [...rows].sort((a, b) => Number(a.price) - Number(b.price));
+        const lowest = sorted[0];
+        const highest = sorted[sorted.length - 1];
+        return {
+          variantId,
+          label: productName(variantId),
+          offers: sorted,
+          lowest,
+          highest,
+          spread: Number(highest.price) - Number(lowest.price),
+        };
+      })
+      .sort((a, b) => Number(a.lowest.price) - Number(b.lowest.price));
+  }, [activeOffers, products, variants]);
+
   async function saveProduct(model: string, storage: string, color: string, condition: string, sku: string) {
     const [product] = await dataApi.addProduct(model);
     if (!product) throw new Error("Produto não retornado.");
@@ -226,6 +253,32 @@ function Dashboard() {
   async function saveOfferEdit(id: string, supplierId: string, variantId: string, price: string, stock: string, active: boolean) {
     await dataApi.updateOffer(id, { supplier_id: supplierId, product_variant_id: variantId, price: Number(price), stock_quantity: stock === "" ? null : Number(stock), active });
     setModal(null); setEditingOffer(null); setNotice("Oferta atualizada."); await load();
+  }
+
+  async function saveVariant(productId: string, storage: string, color: string, condition: string, sku: string) {
+    await dataApi.addVariant({
+      product_id: productId,
+      storage_gb: Number(storage),
+      color,
+      condition,
+      sku: sku || null,
+    });
+    setModal("variants");
+    setNotice("Variante cadastrada.");
+    await load();
+  }
+
+  async function saveVariantEdit(id: string, storage: string, color: string, condition: string, sku: string) {
+    await dataApi.updateVariant(id, {
+      storage_gb: Number(storage),
+      color,
+      condition,
+      sku: sku || null,
+    });
+    setModal("variants");
+    setEditingVariant(null);
+    setNotice("Variante atualizada.");
+    await load();
   }
 
   function logout() {
@@ -493,7 +546,7 @@ function Dashboard() {
                     </div>
                     <div className="flex items-center gap-2">
                       <span className={statusPill(product.active)}>{product.active ? "Ativo" : "Inativo"}</span>
-                      {canManage && <button type="button" onClick={() => { setEditingProduct(product); setModal("edit-product"); }} className="rounded-md border border-[var(--app-border)] px-2.5 py-1.5 text-[10px] font-medium text-[var(--app-secondary)] transition hover:bg-white/5 hover:text-white">Editar</button>}
+                      {canManage && <><button type="button" onClick={() => { setSelectedProduct(product); setModal("variants"); }} className="rounded-md border border-[var(--app-border)] px-2.5 py-1.5 text-[10px] font-medium text-[var(--app-secondary)] transition hover:bg-white/5 hover:text-white">Variantes</button><button type="button" onClick={() => { setEditingProduct(product); setModal("edit-product"); }} className="rounded-md border border-[var(--app-border)] px-2.5 py-1.5 text-[10px] font-medium text-[var(--app-secondary)] transition hover:bg-white/5 hover:text-white">Editar</button></>}
                     </div>
                   </div>
                 ))}
@@ -580,31 +633,55 @@ function Dashboard() {
               <div className="mb-6">
                 <p className="section-kicker">Comparação</p>
                 <h2 className="mt-1 text-[30px] font-semibold tracking-[-0.025em]">Comparador</h2>
-                <p className="mt-1 text-[13px] text-[var(--app-secondary)]">Compare as ofertas ativas pelo menor preço.</p>
+                <p className="mt-1 text-[13px] text-[var(--app-secondary)]">Compare fornecedores para a mesma variante, com menor preço e diferença entre ofertas.</p>
               </div>
               <div className="grid gap-5 xl:grid-cols-[minmax(0,1.4fr)_minmax(300px,0.7fr)]">
-                <section className="panel-card">
-                  <div className="panel-header">
-                    <div>
-                      <p className="section-kicker">Menor preço</p>
+                <section className="panel-card overflow-hidden">
+                  <div className="flex flex-col gap-3 border-b border-[var(--app-border)] bg-[var(--app-surface-2)]/40 p-3.5 sm:flex-row sm:items-center">
+                    <div className="min-w-0 flex-1">
+                      <p className="section-kicker">Por variante</p>
                       <h3 className="panel-title">Oportunidades atuais</h3>
                     </div>
-                    <GitCompare className="h-4 w-4 text-[var(--app-purple)]" />
+                    <div className="relative w-full sm:max-w-[260px]">
+                      <Search className="absolute left-3 top-1/2 h-3.5 w-3.5 -translate-y-1/2 text-[var(--app-muted)]" />
+                      <input
+                        value={search}
+                        onChange={(event) => setSearch(event.target.value)}
+                        placeholder="Pesquisar modelo ou fornecedor..."
+                        className="app-input h-9 w-full pl-9"
+                      />
+                    </div>
                   </div>
                   <div className="divide-y divide-[var(--app-border)]">
-                    {[...activeOffers]
-                      .sort((a, b) => Number(a.price) - Number(b.price))
-                      .map((offer, index) => (
-                        <div key={offer.id} className="flex items-center gap-3 px-4 py-3.5">
-                          <span className="flex h-7 w-7 shrink-0 items-center justify-center rounded-md bg-indigo-500/10 text-[11px] font-semibold text-violet-300">{index + 1}</span>
-                          <div className="min-w-0 flex-1">
-                            <p className="truncate text-[13px] font-medium">{productName(offer.product_variant_id)}</p>
-                            <p className="mt-1 text-[11px] text-[var(--app-muted)]">{supplierName(offer.supplier_id)}</p>
+                    {comparisonRows
+                      .filter((row) => `${row.label} ${row.offers.map((offer) => supplierName(offer.supplier_id)).join(" ")}`.toLowerCase().includes(search.toLowerCase()))
+                      .map((row) => (
+                        <div key={row.variantId} className="px-4 py-4">
+                          <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+                            <div className="min-w-0">
+                              <p className="truncate text-[13px] font-semibold text-[var(--app-text)]">{row.label}</p>
+                              <p className="mt-1 text-[11px] text-[var(--app-muted)]">{row.offers.length} fornecedor(es) · diferença de {formatCurrency(row.spread)}</p>
+                            </div>
+                            <div className="text-left sm:text-right">
+                              <p className="text-[15px] font-semibold text-emerald-300">{formatCurrency(row.lowest.price)}</p>
+                              <p className="mt-0.5 text-[10px] uppercase tracking-[0.1em] text-[var(--app-muted)]">menor preço · {supplierName(row.lowest.supplier_id)}</p>
+                            </div>
                           </div>
-                          <p className="text-[14px] font-semibold">{formatCurrency(offer.price)}</p>
+                          <div className="mt-3 grid gap-2 sm:grid-cols-2 lg:grid-cols-3">
+                            {row.offers.map((offer) => (
+                              <div key={offer.id} className="rounded-lg border border-[var(--app-border)] bg-[var(--app-surface-2)]/60 px-3 py-2.5">
+                                <div className="flex items-center justify-between gap-3">
+                                  <span className="truncate text-[11px] font-medium text-[var(--app-secondary)]">{supplierName(offer.supplier_id)}</span>
+                                  <span className="text-[12px] font-semibold text-[var(--app-text)]">{formatCurrency(offer.price)}</span>
+                                </div>
+                                <p className="mt-1 text-[10px] text-[var(--app-muted)]">Estoque: {offer.stock_quantity ?? "—"} · {formatRelativeDate(new Date(offer.observed_at))}</p>
+                              </div>
+                            ))}
+                          </div>
                         </div>
                       ))}
-                    {!activeOffers.length && <EmptyState icon={GitCompare} title="Sem dados para comparar" description="Cadastre ofertas para começar a comparação." />}
+                    {!comparisonRows.length && <EmptyState icon={GitCompare} title="Sem dados para comparar" description="Cadastre ofertas para começar a comparação." />}
+                    {!!comparisonRows.length && !comparisonRows.some((row) => `${row.label} ${row.offers.map((offer) => supplierName(offer.supplier_id)).join(" ")}`.toLowerCase().includes(search.toLowerCase())) && <EmptyState icon={Search} title="Nenhum resultado" description="Ajuste a busca para encontrar outra variante ou fornecedor." compact />}
                   </div>
                 </section>
                 <section className="panel-card">
@@ -616,14 +693,14 @@ function Dashboard() {
                     <CircleDollarSign className="h-4 w-4 text-[var(--app-purple)]" />
                   </div>
                   <div className="space-y-3 p-4">
-                    <SummaryRow label="Melhor preço" value={bestOffer ? formatCurrency(bestOffer.price) : "—"} />
+                    <SummaryRow label="Variantes com oferta" value={String(comparisonRows.length)} />
                     <SummaryRow label="Ofertas ativas" value={String(activeOffers.length)} />
                     <SummaryRow label="Fornecedores ativos" value={String(activeSuppliers.length)} />
+                    <SummaryRow label="Menor preço" value={bestOffer ? formatCurrency(bestOffer.price) : "—"} />
                   </div>
                 </section>
               </div>
             </section>
-          )}
         </section>
       </div>
 
@@ -637,6 +714,9 @@ function Dashboard() {
       }} />}
       {modal === "product" && <ProductModal onClose={() => setModal(null)} onSave={saveProduct} />}
       {modal === "edit-product" && editingProduct && <EditProductModal item={editingProduct} onClose={() => { setModal(null); setEditingProduct(null); }} onSave={saveProductEdit} />}
+      {modal === "variants" && selectedProduct && <VariantModal product={selectedProduct} variants={variants.filter((variant) => variant.product_id === selectedProduct.id)} canManage={canManage} onClose={() => { setModal(null); setSelectedProduct(null); }} onAdd={() => setModal("variant")} onEdit={(variant) => { setEditingVariant(variant); setModal("edit-variant"); }} />}
+      {modal === "variant" && selectedProduct && <AddVariantModal product={selectedProduct} onClose={() => setModal("variants")} onSave={saveVariant} />}
+      {modal === "edit-variant" && editingVariant && <EditVariantModal item={editingVariant} onClose={() => { setModal("variants"); setEditingVariant(null); }} onSave={saveVariantEdit} />}
       {modal === "supplier" && <SupplierModal onClose={() => setModal(null)} onSave={saveSupplier} />}
       {modal === "edit-supplier" && editingSupplier && <EditSupplierModal item={editingSupplier} onClose={() => { setModal(null); setEditingSupplier(null); }} onSave={saveSupplierEdit} />}
       {modal === "offer" && <OfferModal variants={variants} products={products} suppliers={suppliers} onClose={() => setModal(null)} onSave={saveOffer} />}
@@ -806,6 +886,104 @@ function EditSupplierModal({ item, onClose, onSave }: { item: Supplier; onClose:
 function EditOfferModal({ item, variants, products, suppliers, onClose, onSave }: { item: Offer; variants: Variant[]; products: Product[]; suppliers: Supplier[]; onClose: () => void; onSave: (id: string, supplier: string, variant: string, price: string, stock: string, active: boolean) => Promise<void> }) {
   const [supplier, setSupplier] = useState(item.supplier_id); const [variant, setVariant] = useState(item.product_variant_id); const [price, setPrice] = useState(String(item.price)); const [stock, setStock] = useState(item.stock_quantity == null ? "" : String(item.stock_quantity)); const [active, setActive] = useState(item.active); const [busy, setBusy] = useState(false);
   return <Modal title="Editar oferta" onClose={onClose}><form className="mt-5 space-y-3.5" onSubmit={async e => { e.preventDefault(); setBusy(true); try { await onSave(item.id, supplier, variant, price, stock, active); } finally { setBusy(false); } }}><SelectField label="Fornecedor" value={supplier} onChange={setSupplier} options={suppliers.map(s => s.id)} labels={Object.fromEntries(suppliers.map(s => [s.id, s.name]))} required /><SelectField label="Produto" value={variant} onChange={setVariant} options={variants.map(v => v.id)} labels={Object.fromEntries(variants.map(v => [v.id, productLabel(v, products)]))} required /><Field label="Preço" value={price} onChange={setPrice} type="number" min="0" step="0.01" required /><Field label="Estoque" value={stock} onChange={setStock} type="number" min="0" /><label className="flex items-center gap-2 text-[12px] text-[var(--app-secondary)]"><input type="checkbox" checked={active} onChange={e => setActive(e.target.checked)} /> Oferta ativa</label><ModalButton busy={busy} label="Salvar alterações" /></form></Modal>;
+}
+
+function VariantModal({
+  product,
+  variants,
+  canManage,
+  onClose,
+  onAdd,
+  onEdit,
+}: {
+  product: Product;
+  variants: Variant[];
+  canManage: boolean;
+  onClose: () => void;
+  onAdd: () => void;
+  onEdit: (variant: Variant) => void;
+}) {
+  return (
+    <Modal title={`Variantes · ${product.model}`} onClose={onClose}>
+      <div className="mt-5">
+        {canManage && (
+          <div className="mb-4 flex justify-end">
+            <button type="button" onClick={onAdd} className="inline-flex h-9 items-center gap-2 rounded-lg bg-[var(--app-purple)] px-3 text-[12px] font-semibold text-white transition hover:bg-violet-500">
+              <Plus className="h-3.5 w-3.5" /> Nova variante
+            </button>
+          </div>
+        )}
+        <div className="space-y-2">
+          {variants.map((variant) => (
+            <div key={variant.id} className="flex items-center justify-between gap-3 rounded-lg border border-[var(--app-border)] bg-[var(--app-surface-2)]/55 px-3 py-3">
+              <div className="min-w-0">
+                <p className="text-[12px] font-semibold text-[var(--app-text)]">{variant.storage_gb} GB · {variant.color}</p>
+                <p className="mt-1 text-[10px] text-[var(--app-muted)]">{variant.condition} · SKU {variant.sku || "não informado"}</p>
+              </div>
+              {canManage && (
+                <button type="button" onClick={() => onEdit(variant)} className="shrink-0 rounded-md border border-[var(--app-border)] px-2.5 py-1.5 text-[10px] font-medium text-[var(--app-secondary)] transition hover:bg-white/5 hover:text-white">
+                  Editar
+                </button>
+              )}
+            </div>
+          ))}
+          {!variants.length && <EmptyState icon={Package} title="Nenhuma variante cadastrada" description="Adicione capacidade, cor e condição para este modelo." compact />}
+        </div>
+      </div>
+    </Modal>
+  );
+}
+
+function AddVariantModal({ product, onClose, onSave }: { product: Product; onClose: () => void; onSave: (productId: string, storage: string, color: string, condition: string, sku: string) => Promise<void> }) {
+  const [storage, setStorage] = useState("256");
+  const [color, setColor] = useState("");
+  const [condition, setCondition] = useState("new");
+  const [sku, setSku] = useState("");
+  const [busy, setBusy] = useState(false);
+
+  async function submit(event: FormEvent<HTMLFormElement>) {
+    event.preventDefault();
+    setBusy(true);
+    try { await onSave(product.id, storage, color, condition, sku); } finally { setBusy(false); }
+  }
+
+  return (
+    <Modal title={`Nova variante · ${product.model}`} onClose={onClose}>
+      <form className="mt-5 space-y-3.5" onSubmit={submit}>
+        <Field label="Cor" value={color} onChange={setColor} placeholder="Natural" required />
+        <Field label="SKU" value={sku} onChange={setSku} placeholder="Opcional" />
+        <SelectField label="Capacidade" value={storage} onChange={setStorage} options={["128", "256", "512", "1024"]} />
+        <SelectField label="Condição" value={condition} onChange={setCondition} options={["new", "used", "refurbished", "unknown"]} />
+        <ModalButton busy={busy} label="Cadastrar variante" />
+      </form>
+    </Modal>
+  );
+}
+
+function EditVariantModal({ item, onClose, onSave }: { item: Variant; onClose: () => void; onSave: (id: string, storage: string, color: string, condition: string, sku: string) => Promise<void> }) {
+  const [storage, setStorage] = useState(String(item.storage_gb));
+  const [color, setColor] = useState(item.color);
+  const [condition, setCondition] = useState(item.condition);
+  const [sku, setSku] = useState(item.sku ?? "");
+  const [busy, setBusy] = useState(false);
+
+  async function submit(event: FormEvent<HTMLFormElement>) {
+    event.preventDefault();
+    setBusy(true);
+    try { await onSave(item.id, storage, color.trim(), condition, sku.trim()); } finally { setBusy(false); }
+  }
+
+  return (
+    <Modal title="Editar variante" onClose={onClose}>
+      <form className="mt-5 space-y-3.5" onSubmit={submit}>
+        <Field label="Cor" value={color} onChange={setColor} required />
+        <Field label="SKU" value={sku} onChange={setSku} placeholder="Opcional" />
+        <SelectField label="Capacidade" value={storage} onChange={setStorage} options={["128", "256", "512", "1024"]} />
+        <SelectField label="Condição" value={condition} onChange={setCondition} options={["new", "used", "refurbished", "unknown"]} />
+        <ModalButton busy={busy} label="Salvar alterações" />
+      </form>
+    </Modal>
+  );
 }
 
 function ProductModal({ onClose, onSave }: { onClose: () => void; onSave: (model: string, storage: string, color: string, condition: string, sku: string) => Promise<void> }) {
