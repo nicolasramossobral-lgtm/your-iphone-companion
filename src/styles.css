@@ -152,3 +152,137 @@
   visibility: hidden !important;
   pointer-events: none !important;
 }
+
+
+/* Internal monitoring dashboard visual system */
+:root {
+  --app-bg: #060817;
+  --app-sidebar: #0B0D22;
+  --app-header: #080B1B;
+  --app-surface: #0E1228;
+  --app-surface-2: #11172F;
+  --app-input: #0A1023;
+  --app-border: #242943;
+  --app-text: #F3F4FF;
+  --app-secondary: #A4ACC4;
+  --app-muted: #78839F;
+  --app-purple: #8B5CF6;
+  --app-indigo: #6366F1;
+  --app-blue: #3B82F6;
+  --app-success: #34D399;
+  --app-warning: #FBBF24;
+  --app-error: #FB7185;
+}
+
+html, body {
+  min-height: 100%;
+  font-family: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+}
+
+.app-shell {
+  position: relative;
+  isolation: isolate;
+}
+
+.app-ambient {
+  position: fixed;
+  inset: 0;
+  z-index: -1;
+  pointer-events: none;
+  background:
+    radial-gradient(circle at 0% 0%, rgba(139, 92, 246, 0.09), transparent 30%),
+    radial-gradient(circle at 100% 100%, rgba(59, 130, 246, 0.07), transparent 30%),
+    var(--app-bg);
+}
+
+.brand-mark {
+  display: flex;
+  width: 36px;
+  height: 36px;
+  flex: 0 0 auto;
+  align-items: center;
+  justify-content: center;
+  border: 1px solid rgba(139, 92, 246, 0.45);
+  border-radius: 10px;
+  background: linear-gradient(135deg, rgba(139, 92, 246, 0.95), rgba(59, 130, 246, 0.82));
+  box-shadow: 0 6px 22px rgba(99, 102, 241, 0.16);
+}
+
+.section-kicker {
+  font-size: 10px;
+  line-height: 1;
+  font-weight: 700;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+  color: var(--app-purple);
+}
+
+.panel-card,
+.metric-card {
+  border: 1px solid var(--app-border);
+  border-radius: 13px;
+  background: var(--app-surface);
+  box-shadow: 0 8px 28px rgba(0, 0, 0, 0.14);
+}
+
+.metric-card {
+  padding: 16px;
+}
+
+.panel-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 15px 16px;
+  border-bottom: 1px solid var(--app-border);
+}
+
+.panel-title {
+  margin-top: 5px;
+  font-size: 14px;
+  line-height: 1.2;
+  font-weight: 600;
+  color: var(--app-text);
+}
+
+.app-input {
+  border: 1px solid var(--app-border);
+  border-radius: 8px;
+  background: var(--app-input);
+  color: var(--app-text);
+  padding: 0 12px;
+  font-size: 13px;
+  outline: none;
+  transition: border-color 150ms ease, box-shadow 150ms ease, background 150ms ease;
+}
+
+.app-input::placeholder {
+  color: var(--app-muted);
+}
+
+.app-input:focus {
+  border-color: rgba(139, 92, 246, 0.7);
+  box-shadow: 0 0 0 3px rgba(139, 92, 246, 0.08);
+}
+
+select.app-input {
+  appearance: auto;
+}
+
+.icon-surface {
+  display: flex;
+  height: 32px;
+  width: 32px;
+  align-items: center;
+  justify-content: center;
+  border: 1px solid rgba(139, 92, 246, 0.16);
+  border-radius: 8px;
+  background: rgba(139, 92, 246, 0.08);
+}
+
+@media (max-width: 1023px) {
+  .app-shell .panel-card {
+    box-shadow: 0 6px 22px rgba(0, 0, 0, 0.13);
+  }
+}
