@@ -118,7 +118,7 @@ export async function signIn(email: string, password: string, remember = true): 
     token_type: data.session.token_type,
     user: {
       id: data.user.id,
-      email: data.user.email,
+      ...(data.user.email ? { email: data.user.email } : {}),
     },
   };
 

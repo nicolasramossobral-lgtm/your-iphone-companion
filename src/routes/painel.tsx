@@ -660,7 +660,7 @@ function DataPage({
   search: string;
   setSearch: (value: string) => void;
   searchPlaceholder: string;
-  action?: { label: string; onClick: () => void };
+  action?: { label: string; onClick: () => void } | undefined;
   icon: typeof Package;
   children: ReactNode;
 }) {
