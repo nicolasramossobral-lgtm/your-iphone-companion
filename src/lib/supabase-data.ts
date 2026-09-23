@@ -55,7 +55,7 @@ signupRequests: async () => {
   profile: async () => {
     const session = getStoredSession();
     if (!session) return null;
-    const rows = await request<Array<{ full_name: string | null; email: string | null }>>("profiles", {}, `?select=full_name,email&id=eq.${session.user.id}&limit=1`);
+    const rows = await request<Array<{ full_name: string | null; email: string | null; phone: string | null }>>("profiles", {}, `?select=full_name,email,phone&id=eq.${session.user.id}&limit=1`);
     return rows[0] ?? null;
   },
   role: async () => {
