@@ -16,7 +16,6 @@ import {
   Plus,
   RefreshCw,
   Search,
-  Settings2,
   Smartphone,
   Store,
   Tags,
