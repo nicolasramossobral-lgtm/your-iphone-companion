@@ -280,15 +280,6 @@ function Dashboard() {
             )}
           </nav>
 
-          <div className="my-5 h-px bg-[var(--app-border)]" />
-
-          <p className="px-3 pb-2 text-[10px] font-semibold uppercase tracking-[0.16em] text-[var(--app-muted)]">Sistema</p>
-          <div className="space-y-1">
-            <button className="flex w-full items-center gap-3 rounded-lg border border-transparent px-3 py-2.5 text-[13px] text-[var(--app-secondary)]">
-              <Settings2 className="h-4 w-4 text-[var(--app-muted)]" strokeWidth={1.8} />
-              Preferências
-            </button>
-          </div>
         </div>
 
         <div className="border-t border-[var(--app-border)] p-3">
@@ -672,7 +663,7 @@ function DataPage({
           </div>
           <div className="hidden items-center gap-2 text-[11px] text-[var(--app-muted)] sm:flex">
             <Icon className="h-3.5 w-3.5" />
-            Atualização em tempo real do catálogo
+            Dados atuais do catálogo
           </div>
         </div>
         {children}
