@@ -43,14 +43,14 @@ import {
 
 export const Route = createFileRoute("/painel")({ component: Dashboard });
 
-type Tab = "inicio" | "produtos" | "fornecedores" | "ofertas" | "comparador";
+type Tab = "inicio" | "produtos" | "fornecedores" | "ofertas" | "comparador" | "whatsapp";
 
 const navItems: Array<{ id: Tab; label: string; icon: typeof LayoutDashboard }> = [
   { id: "inicio", label: "Painel", icon: LayoutDashboard },
   { id: "produtos", label: "Produtos", icon: Package },
   { id: "fornecedores", label: "Fornecedores", icon: Truck },
   { id: "ofertas", label: "Ofertas", icon: Tags },
-  { id: "comparador", label: "Comparador", icon: GitCompare },
+  { id: "comparador", label: "Comparador", icon: GitCompare },\n  { id: "whatsapp", label: "WhatsApp", icon: MessageCircle },
 ];
 
 function Dashboard() {
@@ -59,7 +59,7 @@ function Dashboard() {
   const [variants, setVariants] = useState<Variant[]>([]);
   const [suppliers, setSuppliers] = useState<Supplier[]>([]);
   const [offers, setOffers] = useState<Offer[]>([]);
-  const [history, setHistory] = useState<PriceHistory[]>([]);
+  const [history, setHistory] = useState<PriceHistory[]>([]);\n  const [whatsappMessages, setWhatsappMessages] = useState<WhatsAppMessage[]>([]);
   const [profile, setProfile] = useState<{ full_name: string | null; email: string | null; phone: string | null } | null>(null);
   const [role, setRole] = useState<string | null>(null);
   const [loading, setLoading] = useState(true);
@@ -82,7 +82,7 @@ function Dashboard() {
 
     setLoading(true);
     try {
-      const [p, v, s, o, h, currentRole, currentProfile] = await Promise.all([
+      const [p, v, s, o, h, wm, currentRole, currentProfile] = await Promise.all([
         dataApi.products(),
         dataApi.variants(),
         dataApi.suppliers(),
@@ -117,7 +117,7 @@ function Dashboard() {
       .on("postgres_changes", { event: "*", schema: "public", table: "product_variants" }, () => void load())
       .on("postgres_changes", { event: "*", schema: "public", table: "suppliers" }, () => void load())
       .on("postgres_changes", { event: "*", schema: "public", table: "supplier_prices" }, () => void load())
-      .on("postgres_changes", { event: "*", schema: "public", table: "price_history" }, () => void load())
+      .on("postgres_changes", { event: "*", schema: "public", table: "price_history" }, () => void load())\n      .on("postgres_changes", { event: "*", schema: "public", table: "whatsapp_messages" }, () => void load())\n      .on("postgres_changes", { event: "*", schema: "public", table: "message_processing" }, () => void load())
       .subscribe();
     return () => { void supabase.removeChannel(channel); };
   }, []);
@@ -628,6 +628,15 @@ function Dashboard() {
             </DataPage>
           )}
 
+          {tab === "whatsapp" && (
+            <WhatsAppInbox
+              messages={whatsappMessages}
+              suppliers={suppliers}
+              search={search}
+              onSearch={setSearch}
+            />
+          )}
+
           {tab === "comparador" && (
             <section>
               <div className="mb-6">
@@ -723,6 +732,108 @@ function Dashboard() {
       {modal === "offer" && <OfferModal variants={variants} products={products} suppliers={suppliers} onClose={() => setModal(null)} onSave={saveOffer} />}
       {modal === "edit-offer" && editingOffer && <EditOfferModal item={editingOffer} variants={variants} products={products} suppliers={suppliers} onClose={() => { setModal(null); setEditingOffer(null); }} onSave={saveOfferEdit} />}
     </main>
+  );
+}
+
+function WhatsAppInbox({
+  messages,
+  suppliers,
+  search,
+  onSearch,
+}: {
+  messages: WhatsAppMessage[];
+  suppliers: Supplier[];
+  search: string;
+  onSearch: (value: string) => void;
+}) {
+  const supplierName = (supplierId: string | null) =>
+    suppliers.find((supplier) => supplier.id === supplierId)?.name ?? "Fornecedor não identificado";
+
+  const filtered = messages.filter((message) => {
+    const haystack = [
+      message.message_text,
+      message.sender_name,
+      message.sender_phone,
+      message.chat_id,
+      supplierName(message.supplier_id),
+    ].filter(Boolean).join(" ").toLowerCase();
+    return haystack.includes(search.toLowerCase());
+  });
+
+  return (
+    <section>
+      <div className="mb-6">
+        <p className="section-kicker">Ingestão</p>
+        <h2 className="mt-1 text-[30px] font-semibold tracking-[-0.025em]">WhatsApp</h2>
+        <p className="mt-1 max-w-2xl text-[13px] text-[var(--app-secondary)]">
+          Mensagens recebidas pelo webhook, com vínculo de fornecedor e status do processamento automático.
+        </p>
+      </div>
+
+      <div className="grid gap-5 xl:grid-cols-[minmax(0,1fr)_300px]">
+        <section className="panel-card overflow-hidden">
+          <div className="flex flex-col gap-3 border-b border-[var(--app-border)] bg-[var(--app-surface-2)]/40 p-3.5 sm:flex-row sm:items-center">
+            <div className="min-w-0 flex-1">
+              <p className="section-kicker">Mensagens recentes</p>
+              <h3 className="panel-title">{messages.length} mensagens armazenadas</h3>
+            </div>
+            <div className="relative w-full sm:max-w-[300px]">
+              <Search className="absolute left-3 top-1/2 h-3.5 w-3.5 -translate-y-1/2 text-[var(--app-muted)]" />
+              <input
+                value={search}
+                onChange={(event) => onSearch(event.target.value)}
+                placeholder="Buscar mensagem, fornecedor ou grupo..."
+                className="app-input h-9 w-full pl-9"
+              />
+            </div>
+          </div>
+
+          <div className="divide-y divide-[var(--app-border)]">
+            {filtered.map((message) => (
+              <article key={message.id} className="px-4 py-4 transition hover:bg-white/[0.018]">
+                <div className="flex flex-wrap items-center gap-2">
+                  <span className={statusPill(message.processing_status === "processed")}>
+                    {message.processing_status === "processed" ? "Processada" :
+                      message.processing_status === "pending" ? "Pendente" :
+                      message.processing_status === "failed" ? "Falhou" :
+                      message.processing_status === "ignored" ? "Ignorada" : "Recebida"}
+                  </span>
+                  <span className="text-[10px] text-[var(--app-muted)]">{formatRelativeDate(new Date(message.received_at))}</span>
+                  {message.chat_id && <span className="truncate text-[10px] text-[var(--app-muted)]">Conversa: {message.chat_id}</span>}
+                </div>
+                <p className="mt-2 text-[12px] leading-5 text-[var(--app-text)]">{message.message_text}</p>
+                <div className="mt-2 flex flex-wrap gap-x-4 gap-y-1 text-[10px] text-[var(--app-muted)]">
+                  <span>Remetente: {message.sender_name || message.sender_phone || "não identificado"}</span>
+                  <span>Fornecedor: {supplierName(message.supplier_id)}</span>
+                  {message.parser_version && <span>Parser {message.parser_version}</span>}
+                </div>
+              </article>
+            ))}
+            {!filtered.length && (
+              <EmptyState
+                icon={MessageCircle}
+                title={messages.length ? "Nenhuma mensagem encontrada" : "Nenhuma mensagem recebida"}
+                description={messages.length ? "Ajuste a busca para encontrar outras mensagens." : "Quando o webhook do WhatsApp receber uma mensagem, ela aparecerá aqui."}
+              />
+            )}
+          </div>
+        </section>
+
+        <section className="panel-card p-5">
+          <p className="section-kicker">Pipeline</p>
+          <h3 className="panel-title">Fluxo da integração</h3>
+          <div className="mt-4 space-y-1">
+            <SummaryRow label="Mensagens recebidas" value={String(messages.length)} />
+            <SummaryRow label="Processadas" value={String(messages.filter((item) => item.processing_status === "processed").length)} />
+            <SummaryRow label="Pendentes" value={String(messages.filter((item) => item.processing_status === "pending").length)} />
+            <SummaryRow label="Com fornecedor" value={String(messages.filter((item) => item.supplier_id).length)} />
+          </div>
+          <div className="mt-5 rounded-lg border border-violet-400/10 bg-violet-400/5 p-3 text-[10px] leading-5 text-[var(--app-secondary)]">
+            O webhook salva a mensagem primeiro. Depois o parser tenta identificar modelo, capacidade, cor, condição, preço e estoque antes de criar a oferta.
+          </div>
+        </section>
+      </div>
+    </section>
   );
 }
 
