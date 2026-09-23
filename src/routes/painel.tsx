@@ -3,8 +3,6 @@ import { useEffect, useMemo, useState, type FormEvent, type ReactNode } from "re
 import {
   Activity,
   BarChart3,
-  Boxes,
-  Check,
   ChevronLeft,
   CircleDollarSign,
   Clock3,
@@ -17,7 +15,6 @@ import {
   RefreshCw,
   Search,
   Smartphone,
-  Store,
   Tags,
   Truck,
   UserCircle2,
