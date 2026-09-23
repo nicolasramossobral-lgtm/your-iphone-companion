@@ -63,7 +63,7 @@ function Usuarios() {
           <div className="brand-mark"><Smartphone className="h-5 w-5 text-white" strokeWidth={1.8} /></div>
           <div className="min-w-0">
             <p className="text-[10px] font-semibold uppercase tracking-[0.18em] text-[var(--app-purple)]">Painel interno</p>
-            <p className="truncate text-sm font-semibold">Your iPhone Companion</p>
+            <p className="truncate text-sm font-semibold">NG IPhones BR</p>
           </div>
         </div>
         <nav className="flex-1 px-3 py-5">
