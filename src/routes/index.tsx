@@ -86,7 +86,7 @@ function Login() {
             </div>
             <div className="leading-tight">
               <div className="text-lg font-bold tracking-tight">NG IPhones</div>
-              <div className="text-lg font-bold tracking-tight text-violet-400">Companion</div>
+              <div className="text-lg font-bold tracking-tight text-violet-400">BR</div>
             </div>
           </div>
           <nav className="hidden items-center gap-7 text-sm text-blue-200/80 md:flex">
@@ -107,7 +107,7 @@ function Login() {
               <h1 className="text-5xl font-bold leading-[0.98] tracking-tight xl:text-6xl">
                 NG IPhones
                 <span className="block bg-gradient-to-r from-violet-500 via-blue-500 to-cyan-400 bg-clip-text text-transparent">
-                  Companion
+                  BR
                 </span>
               </h1>
               <p className="mt-7 max-w-md text-lg leading-8 text-blue-100/75">
