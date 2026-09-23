@@ -45,21 +45,23 @@ const SUPABASE_URL =
     ? configuredUrl
     : VERIFIED_SUPABASE_URL;
 
-// Prefer an explicitly configured, project-scoped anon key. A publishable key
-// is also accepted for future rotation, while the previously rejected key is
-// never allowed to override the verified fallback.
+// Only trust a browser key when it is explicitly tied to the verified project
+// URL. If Lovable injects credentials for a different project, keep the known
+// working project key instead of sending that mismatched key to Supabase.
 const SUPABASE_ANON_KEY =
-  isProjectAnonKey(configuredAnonKey)
+  configuredUrl === VERIFIED_SUPABASE_URL && isUsablePublicKey(configuredAnonKey)
     ? configuredAnonKey
-    : isUsablePublicKey(configuredPublishableKey)
+    : configuredUrl === VERIFIED_SUPABASE_URL && isUsablePublicKey(configuredPublishableKey)
       ? configuredPublishableKey
       : VERIFIED_SUPABASE_ANON_KEY;
 
 if (
   (configuredAnonKey && !isProjectAnonKey(configuredAnonKey)) ||
-  (configuredPublishableKey && fingerprint(configuredPublishableKey) === REJECTED_PUBLISHABLE_FINGERPRINT)
+  (configuredPublishableKey && fingerprint(configuredPublishableKey) === REJECTED_PUBLISHABLE_FINGERPRINT) ||
+  (configuredUrl && configuredUrl !== VERIFIED_SUPABASE_URL)
 ) {
-  console.warn("[supabase] Ignoring invalid or obsolete browser key configuration.", {
+  console.warn("[supabase] Ignoring invalid or mismatched browser configuration.", {
+    urlMatchesProject: configuredUrl === VERIFIED_SUPABASE_URL,
     anonKeyLooksValid: isProjectAnonKey(configuredAnonKey),
     publishableKeyLooksUsable: isUsablePublicKey(configuredPublishableKey),
     publishableKeyPrefix: configuredPublishableKey?.slice(0, 15) || "missing",
