@@ -106,6 +106,18 @@ function Dashboard() {
 
   useEffect(() => {
     void load();
+    const session = getStoredSession();
+    if (!session) return;
+    void supabase.realtime.setAuth(session.access_token);
+    const channel = supabase
+      .channel("catalog-live")
+      .on("postgres_changes", { event: "*", schema: "public", table: "products" }, () => void load())
+      .on("postgres_changes", { event: "*", schema: "public", table: "product_variants" }, () => void load())
+      .on("postgres_changes", { event: "*", schema: "public", table: "suppliers" }, () => void load())
+      .on("postgres_changes", { event: "*", schema: "public", table: "supplier_prices" }, () => void load())
+      .on("postgres_changes", { event: "*", schema: "public", table: "price_history" }, () => void load())
+      .subscribe();
+    return () => { void supabase.removeChannel(channel); };
   }, []);
 
   const canManage = role === "admin";
