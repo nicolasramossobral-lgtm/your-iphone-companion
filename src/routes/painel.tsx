@@ -31,6 +31,7 @@ import {
   YAxis,
 } from "recharts";
 import { getStoredSession, signOut } from "../lib/supabase-auth";
+import { supabase } from "../lib/supabase-client";
 import {
   dataApi,
   type Offer,
@@ -64,7 +65,10 @@ function Dashboard() {
   const [loading, setLoading] = useState(true);
   const [search, setSearch] = useState("");
   const [mobileNavOpen, setMobileNavOpen] = useState(false);
-  const [modal, setModal] = useState<"product" | "supplier" | "offer" | null>(null);
+  const [modal, setModal] = useState<"product" | "supplier" | "offer" | "edit-product" | "edit-supplier" | "edit-offer" | null>(null);
+  const [editingProduct, setEditingProduct] = useState<Product | null>(null);
+  const [editingSupplier, setEditingSupplier] = useState<Supplier | null>(null);
+  const [editingOffer, setEditingOffer] = useState<Offer | null>(null);
   const [notice, setNotice] = useState<string | null>(null);
 
   async function load() {
@@ -178,14 +182,14 @@ function Dashboard() {
     await load();
   }
 
-  async function saveSupplier(name: string, legalName: string) {
+  async function saveProductEdit(id: string, model: string, active: boolean) {\n    await dataApi.updateProduct(id, { model, active });\n    setModal(null); setEditingProduct(null); setNotice("Produto atualizado."); await load();\n  }\n\n  async function saveSupplier(name: string, legalName: string) {
     await dataApi.addSupplier(name, legalName);
     setModal(null);
     setNotice("Fornecedor cadastrado.");
     await load();
   }
 
-  async function saveOffer(supplierId: string, variantId: string, price: string, stock: string) {
+  async function saveSupplierEdit(id: string, name: string, legalName: string, active: boolean) {\n    await dataApi.updateSupplier(id, { name, legal_name: legalName || null, active });\n    setModal(null); setEditingSupplier(null); setNotice("Fornecedor atualizado."); await load();\n  }\n\n  async function saveOffer(supplierId: string, variantId: string, price: string, stock: string) {
     await dataApi.addOffer({
       supplier_id: supplierId,
       product_variant_id: variantId,
@@ -197,7 +201,7 @@ function Dashboard() {
     await load();
   }
 
-  function logout() {
+  async function saveOfferEdit(id: string, supplierId: string, variantId: string, price: string, stock: string, active: boolean) {\n    await dataApi.updateOffer(id, { supplier_id: supplierId, product_variant_id: variantId, price: Number(price), stock_quantity: stock === "" ? null : Number(stock), active });\n    setModal(null); setEditingOffer(null); setNotice("Oferta atualizada."); await load();\n  }\n\n  function logout() {
     signOut();
     window.location.replace("/");
   }
@@ -513,7 +517,7 @@ function Dashboard() {
                       <th className="px-4 py-3 font-semibold">Fornecedor</th>
                       <th className="px-4 py-3 font-semibold">Preço</th>
                       <th className="px-4 py-3 font-semibold">Estoque</th>
-                      <th className="px-4 py-3 font-semibold">Atualizado</th>
+                      <th className="px-4 py-3 font-semibold">Atualizado</th>\n                      {canManage && <th className="px-4 py-3 font-semibold">Ações</th>}
                     </tr>
                   </thead>
                   <tbody className="divide-y divide-[var(--app-border)]">
@@ -734,7 +738,7 @@ function Modal({ title, onClose, children }: { title: string; onClose: () => voi
   );
 }
 
-function ProductModal({ onClose, onSave }: { onClose: () => void; onSave: (model: string, storage: string, color: string, condition: string, sku: string) => Promise<void> }) {
+\nfunction EditProductModal({ item, onClose, onSave }: { item: Product; onClose: () => void; onSave: (id: string, model: string, active: boolean) => Promise<void> }) {\n  const [model, setModel] = useState(item.model); const [active, setActive] = useState(item.active); const [busy, setBusy] = useState(false);\n  return <Modal title="Editar produto" onClose={onClose}><form className="mt-5 space-y-3.5" onSubmit={async e => { e.preventDefault(); setBusy(true); try { await onSave(item.id, model.trim(), active); } finally { setBusy(false); } }}><Field label="Modelo" value={model} onChange={setModel} required /><label className="flex items-center gap-2 text-[12px] text-[var(--app-secondary)]"><input type="checkbox" checked={active} onChange={e => setActive(e.target.checked)} /> Produto ativo</label><ModalButton busy={busy} label="Salvar alterações" /></form></Modal>;\n}\n\nfunction EditSupplierModal({ item, onClose, onSave }: { item: Supplier; onClose: () => void; onSave: (id: string, name: string, legal: string, active: boolean) => Promise<void> }) {\n  const [name, setName] = useState(item.name); const [legal, setLegal] = useState(item.legal_name ?? ""); const [active, setActive] = useState(item.active); const [busy, setBusy] = useState(false);\n  return <Modal title="Editar fornecedor" onClose={onClose}><form className="mt-5 space-y-3.5" onSubmit={async e => { e.preventDefault(); setBusy(true); try { await onSave(item.id, name.trim(), legal.trim(), active); } finally { setBusy(false); } }}><Field label="Nome" value={name} onChange={setName} required /><Field label="Razão social" value={legal} onChange={setLegal} /><label className="flex items-center gap-2 text-[12px] text-[var(--app-secondary)]"><input type="checkbox" checked={active} onChange={e => setActive(e.target.checked)} /> Fornecedor ativo</label><ModalButton busy={busy} label="Salvar alterações" /></form></Modal>;\n}\n\nfunction EditOfferModal({ item, variants, products, suppliers, onClose, onSave }: { item: Offer; variants: Variant[]; products: Product[]; suppliers: Supplier[]; onClose: () => void; onSave: (id: string, supplier: string, variant: string, price: string, stock: string, active: boolean) => Promise<void> }) {\n  const [supplier, setSupplier] = useState(item.supplier_id); const [variant, setVariant] = useState(item.product_variant_id); const [price, setPrice] = useState(String(item.price)); const [stock, setStock] = useState(item.stock_quantity == null ? "" : String(item.stock_quantity)); const [active, setActive] = useState(item.active); const [busy, setBusy] = useState(false);\n  return <Modal title="Editar oferta" onClose={onClose}><form className="mt-5 space-y-3.5" onSubmit={async e => { e.preventDefault(); setBusy(true); try { await onSave(item.id, supplier, variant, price, stock, active); } finally { setBusy(false); } }}><SelectField label="Fornecedor" value={supplier} onChange={setSupplier} options={suppliers.map(s => s.id)} labels={Object.fromEntries(suppliers.map(s => [s.id, s.name]))} required /><SelectField label="Produto" value={variant} onChange={setVariant} options={variants.map(v => v.id)} labels={Object.fromEntries(variants.map(v => [v.id, productLabel(v, products)]))} required /><Field label="Preço" value={price} onChange={setPrice} type="number" min="0" step="0.01" required /><Field label="Estoque" value={stock} onChange={setStock} type="number" min="0" /><label className="flex items-center gap-2 text-[12px] text-[var(--app-secondary)]"><input type="checkbox" checked={active} onChange={e => setActive(e.target.checked)} /> Oferta ativa</label><ModalButton busy={busy} label="Salvar alterações" /></form></Modal>;\n}\n\nfunction ProductModal({ onClose, onSave }: { onClose: () => void; onSave: (model: string, storage: string, color: string, condition: string, sku: string) => Promise<void> }) {
   const [model, setModel] = useState("");
   const [storage, setStorage] = useState("256");
   const [color, setColor] = useState("");
