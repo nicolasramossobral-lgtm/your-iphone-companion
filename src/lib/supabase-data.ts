@@ -69,8 +69,10 @@ signupRequests: async () => {
   addSupplier: (name: string, legal_name: string) => request<Supplier[]>("suppliers", { method: "POST", headers: { Prefer: "return=representation" }, body: JSON.stringify({ name, legal_name, active: true }) }),
   addOffer: (data: Omit<Offer, "id" | "observed_at" | "active">) => request<Offer[]>("supplier_prices", { method: "POST", headers: { Prefer: "return=representation" }, body: JSON.stringify({ ...data, active: true }) }),
   updateProduct: (id: string, data: Partial<Product>) => request<null>("products", { method: "PATCH", body: JSON.stringify(data) }, `?id=eq.${id}`),
+  updateVariant: (id: string, data: Partial<Variant>) => request<null>("product_variants", { method: "PATCH", body: JSON.stringify(data) }, `?id=eq.${id}`),
   updateSupplier: (id: string, data: Partial<Supplier>) => request<null>("suppliers", { method: "PATCH", body: JSON.stringify(data) }, `?id=eq.${id}`),
   updateOffer: (id: string, data: Partial<Offer>) => request<null>("supplier_prices", { method: "PATCH", body: JSON.stringify(data) }, `?id=eq.${id}`),
+  updateProfile: (id: string, data: { full_name?: string; phone?: string | null }) => request<null>("profiles", { method: "PATCH", body: JSON.stringify(data) }, `?id=eq.${id}`),
 };
 
 async function adminSignupAction(action: "approve" | "reject", requestId: string) {
