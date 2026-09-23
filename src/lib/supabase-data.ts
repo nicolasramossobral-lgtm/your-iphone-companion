@@ -31,6 +31,7 @@ export type Variant = { id: string; product_id: string; storage_gb: number; colo
 export type Supplier = { id: string; name: string; legal_name: string | null; notes: string | null; active: boolean };
 export type SignupRequest = { id: string; auth_user_id: string | null; email: string; full_name: string | null; status: string; created_at: string; reviewed_at: string | null; reviewed_by: string | null };
 export type Offer = { id: string; supplier_id: string; product_variant_id: string; price: number; stock_quantity: number | null; observed_at: string; active: boolean };
+export type PriceHistory = { id: string; supplier_price_id: string | null; supplier_id: string; product_variant_id: string; price: number; stock_quantity: number | null; observed_at: string; source_message_id: string | null; created_at: string };
 
 export const dataApi = {
 signupRequests: async () => {
@@ -50,6 +51,13 @@ signupRequests: async () => {
   variants: () => request<Variant[]>("product_variants", {}, "?select=*&order=storage_gb"),
   suppliers: () => request<Supplier[]>("suppliers", {}, "?select=*&order=name"),
   offers: () => request<Offer[]>("supplier_prices", {}, "?select=*&order=price"),
+  priceHistory: () => request<PriceHistory[]>("price_history", {}, "?select=*&order=observed_at.desc&limit=100"),
+  profile: async () => {
+    const session = getStoredSession();
+    if (!session) return null;
+    const rows = await request<Array<{ full_name: string | null; email: string | null }>>("profiles", {}, `?select=full_name,email&id=eq.${session.user.id}&limit=1`);
+    return rows[0] ?? null;
+  },
   role: async () => {
     const session = getStoredSession();
     if (!session) return null;
