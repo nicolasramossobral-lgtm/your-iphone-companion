@@ -438,6 +438,59 @@ select.app-input {
   }
 }
 
+
+  .ui-3d-surface {
+    position: relative;
+    transform-style: preserve-3d;
+    transform-origin: center center;
+    backface-visibility: hidden;
+    will-change: transform, translate, rotate, scale, box-shadow;
+    transition:
+      box-shadow 260ms cubic-bezier(0.2, 0.8, 0.2, 1),
+      transform 260ms cubic-bezier(0.2, 0.8, 0.2, 1),
+      translate 260ms cubic-bezier(0.2, 0.8, 0.2, 1),
+      rotate 260ms cubic-bezier(0.2, 0.8, 0.2, 1),
+      scale 260ms cubic-bezier(0.2, 0.8, 0.2, 1);
+  }
+
+  .ui-3d-surface:hover {
+    translate: 0 -4px;
+    rotate: 1 0.75 0 1.35deg;
+    scale: 1.012;
+    z-index: 2;
+    box-shadow:
+      0 20px 42px rgba(0, 0, 0, 0.30),
+      0 6px 18px rgba(99, 102, 241, 0.16),
+      inset 0 1px 0 rgba(255, 255, 255, 0.08);
+  }
+
+  .ui-3d-surface::after {
+    content: "";
+    position: absolute;
+    inset: 0;
+    border-radius: inherit;
+    pointer-events: none;
+    opacity: 0;
+    background:
+      linear-gradient(
+        115deg,
+        transparent 0%,
+        transparent 36%,
+        rgba(255, 255, 255, 0.09) 49%,
+        transparent 62%,
+        transparent 100%
+      );
+    transform: translateZ(1px);
+    background-size: 220% 100%;
+    background-position: 120% 0;
+    transition: opacity 220ms ease, background-position 420ms ease;
+  }
+
+  .ui-3d-surface:hover::after {
+    opacity: 1;
+    background-position: -20% 0;
+  }
+
 @media (prefers-reduced-motion: reduce) {
   :where(
     button:not(.fixed.inset-0),
