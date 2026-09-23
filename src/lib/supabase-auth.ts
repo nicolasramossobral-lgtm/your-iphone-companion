@@ -12,6 +12,7 @@ export type AuthSession = {
 };
 
 const SESSION_KEY = "your-iphone-companion.auth";
+const SESSION_KEY_SESSION = "your-iphone-companion.session";
 
 function assertConfig() {
   if (!SUPABASE_URL || !SUPABASE_ANON_KEY) {
@@ -85,7 +86,7 @@ export async function signUp(
   return payload.session ?? null;
 }
 
-export async function signIn(email: string, password: string): Promise<AuthSession> {
+export async function signIn(email: string, password: string, remember = true): Promise<AuthSession> {
   assertConfig();
 
   const { data, error } = await supabase.auth.signInWithPassword({
@@ -118,13 +119,21 @@ export async function signIn(email: string, password: string): Promise<AuthSessi
     },
   };
 
-  localStorage.setItem(SESSION_KEY, JSON.stringify(session));
+  const serialized = JSON.stringify(session);
+  if (remember) {
+    localStorage.setItem(SESSION_KEY, serialized);
+    sessionStorage.removeItem(SESSION_KEY_SESSION);
+  } else {
+    sessionStorage.setItem(SESSION_KEY_SESSION, serialized);
+    localStorage.removeItem(SESSION_KEY);
+    sessionStorage.removeItem(SESSION_KEY_SESSION);
+  }
   return session;
 }
 
 export function getStoredSession(): AuthSession | null {
   if (typeof window === "undefined") return null;
-  const raw = localStorage.getItem(SESSION_KEY);
+  const raw = localStorage.getItem(SESSION_KEY) ?? sessionStorage.getItem(SESSION_KEY_SESSION);
   if (!raw) return null;
   try {
     const session = JSON.parse(raw) as AuthSession;
@@ -140,7 +149,10 @@ export function getStoredSession(): AuthSession | null {
 }
 
 export function signOut() {
-  if (typeof window !== "undefined") localStorage.removeItem(SESSION_KEY);
+  if (typeof window !== "undefined") {
+    localStorage.removeItem(SESSION_KEY);
+    sessionStorage.removeItem(SESSION_KEY_SESSION);
+  }
 }
 
 export async function resetPassword(email: string) {
@@ -154,4 +166,24 @@ export async function resetPassword(email: string) {
     const payload = (await response.json()) as { msg?: string; error_description?: string };
     throw new Error(payload.error_description ?? payload.msg ?? "Não foi possível enviar o e-mail de recuperação.");
   }
+}
+
+export async function recoverSessionFromUrl() {
+  if (typeof window === "undefined") return false;
+  const hash = new URLSearchParams(window.location.hash.replace(/^#/, ""));
+  const accessToken = hash.get("access_token");
+  const refreshToken = hash.get("refresh_token");
+  if (!accessToken || !refreshToken) return false;
+  const { error } = await supabase.auth.setSession({ access_token: accessToken, refresh_token: refreshToken });
+  if (error) throw new Error("O link de recuperação expirou ou é inválido.");
+  window.history.replaceState({}, document.title, window.location.pathname);
+  return true;
+}
+
+export async function updatePassword(password: string) {
+  assertConfig();
+  const { error } = await supabase.auth.updateUser({ password });
+  if (error) throw new Error(error.message || "Não foi possível atualizar a senha.");
+  await supabase.auth.signOut();
+  signOut();
 }
