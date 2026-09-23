@@ -773,7 +773,7 @@ function ProfileModal({ profile, userId, onClose, onSave }: { profile: { full_na
   const [name, setName] = useState(profile.full_name ?? "");
   const [phone, setPhone] = useState(profile.phone ?? "");
   const [busy, setBusy] = useState(false);
-  return <Modal title="Meu perfil" onClose={onClose}><form className="mt-5 space-y-3.5" onSubmit={async e => { e.preventDefault(); if (!userId) return; setBusy(true); try { await onSave(name.trim(), phone.trim()); } finally { setBusy(false); } }}><Field label="Nome completo" value={name} onChange={setName} required /><Field label="E-mail" value={profile.email ?? ""} onChange={() => {}} /><Field label="Telefone / WhatsApp" value={phone} onChange={setPhone} placeholder="(11) 99999-9999" /><ModalButton busy={busy} label="Salvar perfil" /></form></Modal>;
+  return <Modal title="Meu perfil" onClose={onClose}><form className="mt-5 space-y-3.5" onSubmit={async e => { e.preventDefault(); if (!userId) return; setBusy(true); try { await onSave(name.trim(), phone.trim()); } finally { setBusy(false); } }}><Field label="Nome completo" value={name} onChange={setName} required /><div><span className="mb-1.5 block text-[11px] font-medium text-[var(--app-secondary)]">E-mail</span><div className="flex h-10 items-center rounded-lg border border-[var(--app-border)] bg-[var(--app-surface-2)] px-3 text-[12px] text-[var(--app-muted)]">{profile.email ?? "—"}</div></div><Field label="Telefone / WhatsApp" value={phone} onChange={setPhone} placeholder="(11) 99999-9999" /><ModalButton busy={busy} label="Salvar perfil" /></form></Modal>;
 }
 
 function EditProductModal({ item, onClose, onSave }: { item: Product; onClose: () => void; onSave: (id: string, model: string, active: boolean) => Promise<void> }) {
