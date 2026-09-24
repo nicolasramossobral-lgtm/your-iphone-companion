@@ -409,7 +409,7 @@ select.app-input {
         transparent 61%,
         transparent 100%
       );
-    transform: translateZ(1px);
+    transform: none;
     transition: opacity 220ms ease, background-position 420ms ease;
     background-size: 220% 100%;
     background-position: 120% 0;
@@ -421,7 +421,7 @@ select.app-input {
   }
 
   :where(.panel-card, .metric-card) {
-    perspective: 1100px;
+    perspective: none;
   }
 
   :where(
@@ -449,7 +449,7 @@ select.app-input {
   input[type="radio"]:hover {
     scale: 1.08;
     rotate: none;
-    filter: drop-shadow(0 5px 8px rgba(99, 102, 241, 0.25));
+    filter: none;
   }
 
   :where(button, a, input, select, textarea, [role="button"]):disabled {
@@ -465,9 +465,9 @@ select.app-input {
 
   .ui-3d-surface {
     position: relative;
-    transform-style: preserve-3d;
+    transform-style: flat;
     transform-origin: center center;
-    backface-visibility: hidden;
+    backface-visibility: visible;
     will-change: transform, translate, rotate, scale, box-shadow;
     transition:
       box-shadow 260ms cubic-bezier(0.2, 0.8, 0.2, 1),
@@ -479,7 +479,7 @@ select.app-input {
 
   .ui-3d-surface:hover {
     translate: 0 -4px;
-    rotate: 1 0.75 0 1.35deg;
+    rotate: none;
     scale: 1.012;
     z-index: 2;
     box-shadow:
