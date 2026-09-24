@@ -156,7 +156,7 @@ function Login() {
           </section>
 
           <section className="flex w-full justify-center lg:justify-end">
-            <div className="ui-3d-surface w-full max-w-xl rounded-[28px] border border-violet-500/80 bg-slate-950/55 p-6 shadow-[0_0_55px_rgba(99,102,241,0.22)] backdrop-blur-xl sm:p-8 md:p-10">
+            <div className="ui-3d-surface login-3d-surface w-full max-w-xl rounded-[28px] border border-violet-500/80 bg-slate-950/55 p-6 shadow-[0_0_55px_rgba(99,102,241,0.22)] backdrop-blur-xl sm:p-8 md:p-10">
               <div className="mx-auto max-w-md">
                 <div className="mb-8 text-center">
                   <div className="mx-auto mb-5 flex h-16 w-16 items-center justify-center rounded-2xl border border-violet-400/60 bg-gradient-to-br from-violet-600/70 via-blue-600/50 to-cyan-400/30 shadow-[0_0_35px_rgba(99,102,241,0.4)]">
