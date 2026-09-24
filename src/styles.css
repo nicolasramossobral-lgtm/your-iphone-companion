@@ -608,3 +608,42 @@ textarea {
     transform: none;
   }
 }
+
+/* Global no-blur override: remove every CSS/Tailwind blur/backdrop blur effect, including hover/focus states and pseudo-elements. */
+*, *::before, *::after {
+  filter: none !important;
+  -webkit-filter: none !important;
+  backdrop-filter: none !important;
+  -webkit-backdrop-filter: none !important;
+}
+
+/* Catch utility classes such as blur-*, backdrop-blur-* and inline blur effects. */
+[class*="blur-"],
+[class*="backdrop-blur"],
+[class~="blur"] {
+  filter: none !important;
+  -webkit-filter: none !important;
+  backdrop-filter: none !important;
+  -webkit-backdrop-filter: none !important;
+}
+
+/* Keep form controls crisp when hovered/focused; never introduce a blur on login fields. */
+input:hover,
+input:focus,
+input:focus-visible,
+input:active,
+textarea:hover,
+textarea:focus,
+select:hover,
+select:focus,
+button:hover,
+button:focus,
+button:focus-visible,
+.login-3d-surface,
+.login-3d-surface:hover,
+.login-3d-surface:focus-within {
+  filter: none !important;
+  -webkit-filter: none !important;
+  backdrop-filter: none !important;
+  -webkit-backdrop-filter: none !important;
+}
