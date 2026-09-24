@@ -596,6 +596,8 @@ textarea {
   .login-3d-surface {
     transform-style: flat;
     backface-visibility: visible;
+    perspective: none;
+    filter: none;
     will-change: translate, box-shadow;
   }
 
