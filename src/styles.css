@@ -360,16 +360,12 @@ select.app-input {
       inset 0 1px 0 rgba(255, 255, 255, 0.06);
   }
 
-  /* Focus the card under the pointer and soften the surrounding choices. */
-  .metric-card-group:hover .metric-card:not(:hover) {
-    filter: blur(3px);
-    opacity: 0.38;
-    scale: 0.985;
+  /* Keep every metric card sharp; hover only controls physical movement/depth. */
+  .metric-card-group:hover .metric-card {
+    opacity: 1;
   }
 
   .metric-card-group:hover .metric-card:hover {
-    filter: none;
-    opacity: 1;
     translate: 0 -5px;
     scale: 1.018;
     box-shadow:
