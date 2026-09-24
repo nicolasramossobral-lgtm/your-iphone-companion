@@ -310,9 +310,9 @@ select.app-input {
     .icon-surface
   ) {
     position: relative;
-    transform-style: preserve-3d;
+    transform-style: flat;
     transform-origin: center center;
-    backface-visibility: hidden;
+    backface-visibility: visible;
     will-change: transform, translate, rotate, scale, box-shadow;
     transition:
       color 180ms ease,
@@ -383,7 +383,7 @@ select.app-input {
     [role="button"]
   ):active:not(:disabled) {
     translate: 0 -1px;
-    rotate: 1 0.75 0 0.5deg;
+    rotate: none;
     scale: 0.995;
     box-shadow:
       0 7px 16px rgba(0, 0, 0, 0.22),
