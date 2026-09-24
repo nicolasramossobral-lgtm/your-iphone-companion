@@ -589,3 +589,20 @@ textarea {
   scale: none !important;
   box-shadow: none !important;
 }
+
+
+/* Login surface: preserve hover lift without GPU 3D rotation that can soften text/fields. */
+@media (hover: hover) and (pointer: fine) {
+  .login-3d-surface {
+    transform-style: flat;
+    backface-visibility: visible;
+    will-change: translate, box-shadow;
+  }
+
+  .login-3d-surface:hover {
+    translate: 0 -4px;
+    rotate: none;
+    scale: 1.008;
+    transform: none;
+  }
+}
