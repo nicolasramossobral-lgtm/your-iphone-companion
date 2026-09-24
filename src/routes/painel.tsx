@@ -10,6 +10,7 @@ import {
   LayoutDashboard,
   LogOut,
   Menu,
+  MessageCircle,
   Package,
   Plus,
   RefreshCw,
@@ -39,6 +40,7 @@ import {
   type Product,
   type Supplier,
   type Variant,
+  type WhatsAppMessage,
 } from "../lib/supabase-data";
 
 export const Route = createFileRoute("/painel")({ component: Dashboard });
@@ -50,7 +52,8 @@ const navItems: Array<{ id: Tab; label: string; icon: typeof LayoutDashboard }> 
   { id: "produtos", label: "Produtos", icon: Package },
   { id: "fornecedores", label: "Fornecedores", icon: Truck },
   { id: "ofertas", label: "Ofertas", icon: Tags },
-  { id: "comparador", label: "Comparador", icon: GitCompare },\n  { id: "whatsapp", label: "WhatsApp", icon: MessageCircle },
+  { id: "comparador", label: "Comparador", icon: GitCompare },
+  { id: "whatsapp", label: "WhatsApp", icon: MessageCircle },
 ];
 
 function Dashboard() {
@@ -59,7 +62,8 @@ function Dashboard() {
   const [variants, setVariants] = useState<Variant[]>([]);
   const [suppliers, setSuppliers] = useState<Supplier[]>([]);
   const [offers, setOffers] = useState<Offer[]>([]);
-  const [history, setHistory] = useState<PriceHistory[]>([]);\n  const [whatsappMessages, setWhatsappMessages] = useState<WhatsAppMessage[]>([]);
+  const [history, setHistory] = useState<PriceHistory[]>([]);
+  const [whatsappMessages, setWhatsappMessages] = useState<WhatsAppMessage[]>([]);
   const [profile, setProfile] = useState<{ full_name: string | null; email: string | null; phone: string | null } | null>(null);
   const [role, setRole] = useState<string | null>(null);
   const [loading, setLoading] = useState(true);
@@ -88,6 +92,7 @@ function Dashboard() {
         dataApi.suppliers(),
         dataApi.offers(),
         dataApi.priceHistory(),
+        dataApi.whatsappMessages(),
         dataApi.role(),
         dataApi.profile(),
       ]);
@@ -96,6 +101,7 @@ function Dashboard() {
       setSuppliers(s);
       setOffers(o);
       setHistory(h);
+      setWhatsappMessages(wm);
       setRole(currentRole);
       setProfile(currentProfile);
       setNotice(null);
@@ -117,7 +123,9 @@ function Dashboard() {
       .on("postgres_changes", { event: "*", schema: "public", table: "product_variants" }, () => void load())
       .on("postgres_changes", { event: "*", schema: "public", table: "suppliers" }, () => void load())
       .on("postgres_changes", { event: "*", schema: "public", table: "supplier_prices" }, () => void load())
-      .on("postgres_changes", { event: "*", schema: "public", table: "price_history" }, () => void load())\n      .on("postgres_changes", { event: "*", schema: "public", table: "whatsapp_messages" }, () => void load())\n      .on("postgres_changes", { event: "*", schema: "public", table: "message_processing" }, () => void load())
+      .on("postgres_changes", { event: "*", schema: "public", table: "price_history" }, () => void load())
+      .on("postgres_changes", { event: "*", schema: "public", table: "whatsapp_messages" }, () => void load())
+      .on("postgres_changes", { event: "*", schema: "public", table: "message_processing" }, () => void load())
       .subscribe();
     return () => { void supabase.removeChannel(channel); };
   }, []);
